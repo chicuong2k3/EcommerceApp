@@ -15,7 +15,15 @@ builder.Services.AddLogger();
 builder.Services.AddRepository();
 builder.Services.AddAutoMapper(typeof(Program));
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(config =>
+{
+    config.RespectBrowserAcceptHeader = true;
+    config.ReturnHttpNotAcceptable = true; // return 406 status code if clients negotiate for media type the server does not support
+})
+    .AddXmlDataContractSerializerFormatters()
+    .AddCSVFormatter()
+    .AddApplicationPart(typeof(Program).Assembly);
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

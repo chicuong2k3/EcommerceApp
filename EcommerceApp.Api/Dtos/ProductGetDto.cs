@@ -1,10 +1,12 @@
 ﻿namespace EcommerceApp.Api.Dtos
 {
-    public record ProductGetDto(
-        int Id,
-        string Name,
-        string Description,
-        decimal Price,
-        string PhotoUrl,
-        int CategoryId);
+    public record ProductGetDto
+    {
+        public int Id { get; init; }
+        public string Name { get; init; }
+        public string Description { get; init; }
+        public decimal Price { get; init; }
+        public string PhotoUrl { get; init; }
+        public int CategoryId { get; init; }
+    }
 }
