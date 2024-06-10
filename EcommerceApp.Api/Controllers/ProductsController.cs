@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using EcommerceApp.Api.Dtos;
+using EcommerceApp.Api.ModelBinders;
 using EcommerceApp.Api.Services.Interfaces;
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
@@ -83,6 +84,28 @@ namespace EcommerceApp.Api.Controllers
             await productRepository.DeleteAsync(id);
 
             return Ok("Deleted the product successfully.");
+        }
+
+        [HttpGet("collection/({ids})")]
+        public async Task<IActionResult> GetProductCollection([ModelBinder(BinderType = typeof(ListModelBinder))] IEnumerable<int> ids)
+        {
+            var products = await productRepository.GetProductsByIdsAsync(ids);
+
+            return Ok(mapper.Map<List<ProductGetDto>>(products));
+        }
+
+        [HttpPost("collection")]
+        public async Task<IActionResult> CreateProductList(IEnumerable<ProductPostPutDto> productPostPutDtos)
+        {
+            var result = new List<ProductGetDto>();
+            var products = mapper.Map<IEnumerable<Product>>(productPostPutDtos);
+            foreach (var product in products)
+            {
+                var addedProduct = await productRepository.InsertAsync(product);
+                result.Add(mapper.Map<ProductGetDto>(addedProduct));
+            }
+
+            return CreatedAtAction(nameof(GetProductCollection), new { ids = string.Join(",", products.Select(p => p.Id)) }, result);
         }
     }
 }

@@ -17,5 +17,13 @@ namespace EcommerceApp.DAL.Repositories
                 .ToListAsync();
             return products;
         }
+
+        public async Task<List<Product>> GetProductsByIdsAsync(IEnumerable<int> ids)
+        {
+            var products = await dbContext.Products
+                .Where(x => ids.Contains(x.Id))
+                .ToListAsync();
+            return products;
+        }
     }
 }

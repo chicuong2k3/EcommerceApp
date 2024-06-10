@@ -3,6 +3,7 @@ using EcommerceApp.Domain.Models;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Net.Http.Headers;
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace EcommerceApp.Api.Formatters
@@ -28,20 +29,22 @@ namespace EcommerceApp.Api.Formatters
         private static void FormatCsv(StringBuilder buffer, CategoryGetDto categoryGetDto)
         {
             buffer.AppendLine($"{categoryGetDto.Id},\"{categoryGetDto.Name}\"");
-        }
+        }
+
         public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
         {
             var buffer = new StringBuilder();
-
-            if (context.Object is IEnumerable<CategoryGetDto>)
+            var categories = context.Object as IEnumerable<CategoryGetDto>;
+            if (categories != null)
             {
-                foreach (var category in (IEnumerable<CategoryGetDto>)context.Object)
+                foreach (var category in categories)
                 {
                     FormatCsv(buffer, category);
                 }
-            }            else
+            }
+            else
             {
-                FormatCsv(buffer, (CategoryGetDto)context.Object);
+                FormatCsv(buffer, context.Object as CategoryGetDto ?? new CategoryGetDto());
             }
 
             await context.HttpContext.Response.WriteAsync(buffer.ToString());
