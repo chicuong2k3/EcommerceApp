@@ -8,8 +8,8 @@
 
         Task<T> InsertAsync(T entity);
 
-        Task UpdateAsync(int id, T updatedEntity);
+        Task<bool> UpdateAsync(int id, T updatedEntity);
 
-        Task DeleteAsync(int id);
+        Task<bool> DeleteAsync(int id);
     }
 }

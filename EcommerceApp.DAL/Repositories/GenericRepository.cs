@@ -1,5 +1,4 @@
-﻿using EcommerceApp.Domain.Exceptions;
-using EcommerceApp.Domain.Interfaces;
+﻿using EcommerceApp.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApp.DAL.Repositories
@@ -20,17 +19,18 @@ namespace EcommerceApp.DAL.Repositories
             return entity;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
             var entity = await dbContext.Set<T>().FindAsync(id);
 
             if (entity == null)
             {
-                throw new NotFoundException("Entity is not found.");
+                return false;
             }
 
             dbContext.Set<T>().Remove(entity);
             await dbContext.SaveChangesAsync();
+            return true;
         }
 
         public async Task<List<T>> GetAllAsync()
@@ -44,17 +44,19 @@ namespace EcommerceApp.DAL.Repositories
             return entity;
         }
 
-        public async Task UpdateAsync(int id, T updatedEntity)
+        public async Task<bool> UpdateAsync(int id, T updatedEntity)
         {
             var existingEntity = await dbContext.Set<T>().FindAsync(id);
             if (existingEntity == null)
             {
-                throw new NotFoundException("Entity is not found.");
+                return false;
             }
 
             dbContext.Entry(existingEntity).CurrentValues.SetValues(updatedEntity);
 
             await dbContext.SaveChangesAsync();
+
+            return true;
         }
     }
 }

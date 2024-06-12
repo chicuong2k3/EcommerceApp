@@ -62,7 +62,12 @@ namespace EcommerceApp.Api.Controllers
             var updatedCategory = mapper.Map<Category>(categoryPostPutDto);
             updatedCategory.Id = id;
 
-            await categoryRepository.UpdateAsync(id, updatedCategory);
+            var success = await categoryRepository.UpdateAsync(id, updatedCategory);
+
+            if (!success)
+            {
+                return NotFound($"Cannot find the category to update.");
+            }
 
             return Ok("Updated the category successfully.");
         }
@@ -70,9 +75,14 @@ namespace EcommerceApp.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await categoryRepository.DeleteAsync(id);
+            var success = await categoryRepository.DeleteAsync(id);
 
-            return Ok("Deleted the category successfully.");
+            if (!success)
+            {
+                return NotFound($"Cannot find the category to delete.");
+            }
+
+            return NoContent();
         }
     }
 }

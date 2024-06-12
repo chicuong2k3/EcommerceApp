@@ -1,6 +1,9 @@
 using EcommerceApp.Api.ExtensionMethods;
 using EcommerceApp.DAL;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,10 +18,18 @@ builder.Services.AddLogger();
 builder.Services.AddRepository();
 builder.Services.AddAutoMapper(typeof(Program));
 
+NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter() => new ServiceCollection().AddLogging()
+            .AddMvc()
+            .AddNewtonsoftJson().Services
+            .BuildServiceProvider()
+            .GetRequiredService<IOptions<MvcOptions>>().Value.InputFormatters
+            .OfType<NewtonsoftJsonPatchInputFormatter>().First();
+
 builder.Services.AddControllers(config =>
 {
     config.RespectBrowserAcceptHeader = true;
     config.ReturnHttpNotAcceptable = true; // return 406 status code if clients negotiate for media type the server does not support
+    config.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
 })
     .AddXmlDataContractSerializerFormatters()
     .AddCSVFormatter()

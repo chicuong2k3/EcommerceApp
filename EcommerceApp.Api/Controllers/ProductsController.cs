@@ -73,7 +73,12 @@ namespace EcommerceApp.Api.Controllers
             var updatedProduct = mapper.Map<Product>(productPostPutDto);
             updatedProduct.Id = id;
 
-            await productRepository.UpdateAsync(id, updatedProduct);
+            var success = await productRepository.UpdateAsync(id, updatedProduct);
+
+            if (!success)
+            {
+                return NotFound($"Cannot find the product to update.");
+            }
 
             return Ok("Updated the product successfully.");
         }
@@ -81,9 +86,14 @@ namespace EcommerceApp.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await productRepository.DeleteAsync(id);
+            var success = await productRepository.DeleteAsync(id);
 
-            return Ok("Deleted the product successfully.");
+            if (!success)
+            {
+                return NotFound($"Cannot find the product to delete.");
+            }
+
+            return NoContent();
         }
 
         [HttpGet("collection/({ids})")]
