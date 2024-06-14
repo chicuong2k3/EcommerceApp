@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using EcommerceApp.Api.CustomFilters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,11 +37,16 @@ builder.Services.AddControllers(config =>
     config.RespectBrowserAcceptHeader = true;
     config.ReturnHttpNotAcceptable = true; // return 406 status code if clients negotiate for media type the server does not support
     config.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
+
+    // config.Filters.Add(); // add global action filters
 })
     .AddNewtonsoftJson()
     .AddXmlDataContractSerializerFormatters()
     .AddCSVFormatter()
     .AddApplicationPart(typeof(Program).Assembly);
+
+
+builder.Services.AddScoped<ValidationFilterAttribute>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

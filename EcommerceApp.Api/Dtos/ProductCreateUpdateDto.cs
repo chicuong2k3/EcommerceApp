@@ -1,4 +1,5 @@
 ﻿using EcommerceApp.Api.CusomAttributes;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.ComponentModel.DataAnnotations;
 
 namespace EcommerceApp.Api.Dtos
@@ -24,7 +25,7 @@ namespace EcommerceApp.Api.Dtos
         [ProductSalePrice]
         public decimal SalePrice { get; set; }
 
-        [Required]
+        [Range(1, int.MaxValue)]
         public int CategoryId { get; set; }
     }
 }

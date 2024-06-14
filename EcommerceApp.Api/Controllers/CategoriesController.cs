@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using EcommerceApp.Api.CustomFilters;
 using EcommerceApp.Api.Dtos;
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
@@ -45,17 +46,9 @@ namespace EcommerceApp.Api.Controllers
         }
 
         [HttpPost]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> Create([FromBody] CategoryCreateUpdateDto categoryCreateUpdateDto)
         {
-            if (categoryCreateUpdateDto == null)
-            {
-                return BadRequest();
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return UnprocessableEntity(ModelState);
-            }
 
             var category = mapper.Map<Category>(categoryCreateUpdateDto);
 
@@ -67,17 +60,9 @@ namespace EcommerceApp.Api.Controllers
         }
 
         [HttpPut("{id}")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> Update(int id, [FromBody] CategoryCreateUpdateDto categoryCreateUpdateDto)
         {
-            if (categoryCreateUpdateDto == null)
-            {
-                return BadRequest();
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return UnprocessableEntity(ModelState);
-            }
 
             var updatedCategory = mapper.Map<Category>(categoryCreateUpdateDto);
             updatedCategory.Id = id;

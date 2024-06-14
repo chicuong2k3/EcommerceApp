@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Azure;
+using EcommerceApp.Api.CustomFilters;
 using EcommerceApp.Api.Dtos;
 using EcommerceApp.Api.ModelBinders;
 using EcommerceApp.Api.Services.Interfaces;
@@ -58,17 +59,9 @@ namespace EcommerceApp.Api.Controllers
         }
 
         [HttpPost]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> Create([FromBody] ProductCreateUpdateDto productCreateUpdateDto)
         {
-            if (productCreateUpdateDto == null)
-            {
-                return BadRequest();
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return UnprocessableEntity(ModelState);
-            }
 
             var product = mapper.Map<Product>(productCreateUpdateDto);
 
@@ -80,18 +73,9 @@ namespace EcommerceApp.Api.Controllers
         }
 
         [HttpPut("{id}")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> Update(int id, [FromBody] ProductCreateUpdateDto productCreateUpdateDto)
         {
-            if (productCreateUpdateDto == null)
-            {
-                return BadRequest();
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return UnprocessableEntity(ModelState);
-            }
-
             var updatedProduct = mapper.Map<Product>(productCreateUpdateDto);
             updatedProduct.Id = id;
 
@@ -127,18 +111,10 @@ namespace EcommerceApp.Api.Controllers
         }
 
         [HttpPost("collection")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> CreateProductList(IEnumerable<ProductCreateUpdateDto> productCreateUpdateDtos)
         {
-            if (productCreateUpdateDtos == null)
-            {
-                return BadRequest();
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return UnprocessableEntity(ModelState);
-            }
-
+            
             var result = new List<ProductGetDto>();
             var products = mapper.Map<IEnumerable<Product>>(productCreateUpdateDtos);
             foreach (var product in products)
