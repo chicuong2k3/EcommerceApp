@@ -45,8 +45,21 @@ builder.Services.AddControllers(config =>
     .AddCSVFormatter()
     .AddApplicationPart(typeof(Program).Assembly);
 
-
+// Add Filters
 builder.Services.AddScoped<ValidationFilterAttribute>();
+
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .WithExposedHeaders("X-Pagination");
+    });
+});
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
