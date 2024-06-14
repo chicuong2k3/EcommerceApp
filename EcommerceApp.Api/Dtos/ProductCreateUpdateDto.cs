@@ -16,11 +16,9 @@ namespace EcommerceApp.Api.Dtos
         [MaxLength(500)]
         public string Description { get; set; }
 
-        [Required]
         [Range(0.0, 1000000000.0)]
         public decimal Price { get; set; }
 
-        [Required]
         [Range(0.0, 1000000000.0)]
         [LessThan(nameof(Price))]
         public decimal SalePrice { get; set; }
