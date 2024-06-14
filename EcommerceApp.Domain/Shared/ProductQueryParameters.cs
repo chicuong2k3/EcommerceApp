@@ -9,5 +9,6 @@ namespace EcommerceApp.Domain.Shared
         [LessThanOrEqual(nameof(MaxPrice))]
         public decimal MinPrice { get; set; } = 0;
         public decimal MaxPrice { get; set; } = int.MaxValue;
+        public string? Keyword { get; set; }
     }
 }

@@ -11,13 +11,22 @@ namespace EcommerceApp.DAL.Repositories
         public ProductRepository(AppDbContext dbContext) : base(dbContext)
         {
         }
-
         public async Task<PagingData<Product>> GetProductsAsync(ProductQueryParameters queryParameters)
         {
+            string keyword =  string.Empty;
+
+            if (!string.IsNullOrEmpty(queryParameters.Keyword))
+            {
+                keyword = queryParameters.Keyword.Trim().ToLower();
+            }
+
+
             if (queryParameters.CategoryId == null)
             {
                 var products = await dbContext.Products
-                            .Where(x => x.Price >= queryParameters.MinPrice && x.Price <= queryParameters.MaxPrice)
+                            .Where(x => 
+                            x.Price >= queryParameters.MinPrice && x.Price <= queryParameters.MaxPrice
+                            && x.Name.ToLower().Contains(keyword))
                             .Skip((queryParameters.PageNumber - 1) * queryParameters.PageSize)
                             .Take(queryParameters.PageSize)
                             .ToListAsync();
@@ -27,8 +36,10 @@ namespace EcommerceApp.DAL.Repositories
             else
             {
                 var products = await dbContext.Products
-                            .Where(x => x.CategoryId == queryParameters.CategoryId
-                            && x.Price >= queryParameters.MinPrice && x.Price <= queryParameters.MaxPrice)
+                            .Where(x => 
+                            x.CategoryId == queryParameters.CategoryId
+                            && x.Price >= queryParameters.MinPrice && x.Price <= queryParameters.MaxPrice
+                            && x.Name.ToLower().Contains(keyword))
                             .Skip((queryParameters.PageNumber - 1) * queryParameters.PageSize)
                             .Take(queryParameters.PageSize)
                             .ToListAsync();
