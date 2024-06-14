@@ -4,6 +4,7 @@ namespace EcommerceApp.Domain.Shared
 {
     public class ProductQueryParameters : QueryParameters
     {
+
         public int? CategoryId { get; set; }
 
         [LessThanOrEqual(nameof(MaxPrice))]

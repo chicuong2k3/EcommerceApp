@@ -2,7 +2,6 @@
 using EcommerceApp.Domain.Models;
 using EcommerceApp.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace EcommerceApp.DAL.Repositories
 {
@@ -20,31 +19,34 @@ namespace EcommerceApp.DAL.Repositories
                 keyword = queryParameters.Keyword.Trim().ToLower();
             }
 
-
             if (queryParameters.CategoryId == null)
             {
-                var products = await dbContext.Products
-                            .Where(x => 
+                var products = dbContext.Products
+                            .Where(x =>
                             x.Price >= queryParameters.MinPrice && x.Price <= queryParameters.MaxPrice
                             && x.Name.ToLower().Contains(keyword))
                             .Skip((queryParameters.PageNumber - 1) * queryParameters.PageSize)
-                            .Take(queryParameters.PageSize)
-                            .ToListAsync();
+                            .Take(queryParameters.PageSize);
 
-                return new PagingData<Product>(products, queryParameters.PageNumber, queryParameters.PageSize);
+                products = products.Sort(queryParameters.OrderBy);
+                var res = await products.ToListAsync();
+
+                return new PagingData<Product>(res, queryParameters.PageNumber, queryParameters.PageSize);
             }
             else
             {
-                var products = await dbContext.Products
-                            .Where(x => 
+                var products = dbContext.Products
+                            .Where(x =>
                             x.CategoryId == queryParameters.CategoryId
                             && x.Price >= queryParameters.MinPrice && x.Price <= queryParameters.MaxPrice
                             && x.Name.ToLower().Contains(keyword))
                             .Skip((queryParameters.PageNumber - 1) * queryParameters.PageSize)
-                            .Take(queryParameters.PageSize)
-                            .ToListAsync();
+                            .Take(queryParameters.PageSize);
 
-                return new PagingData<Product>(products, queryParameters.PageNumber, queryParameters.PageSize);
+                products = products.Sort(queryParameters.OrderBy);
+                var res = await products.ToListAsync();
+
+                return new PagingData<Product>(res, queryParameters.PageNumber, queryParameters.PageSize);
             }
 
         }

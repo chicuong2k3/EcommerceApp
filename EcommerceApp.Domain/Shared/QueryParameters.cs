@@ -7,5 +7,6 @@ namespace EcommerceApp.Domain.Shared
         [Range(1, 50)]
         public int PageSize { get; set; } = 5;
         public int PageNumber { get; set; } = 1;
+        public string? OrderBy { get; set; }
     }
 }
