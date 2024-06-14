@@ -1,5 +1,6 @@
 ﻿using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
+using EcommerceApp.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApp.DAL.Repositories
@@ -10,20 +11,23 @@ namespace EcommerceApp.DAL.Repositories
         {
         }
 
-        public async Task<List<Product>> GetAllProductsAsync(int pageSize, int pageNumber)
+        public async Task<PagingData<Product>> GetAllProductsAsync(int pageNumber, int pageSize)
         {
-            var products = await GetAllAsync();
-            return products.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+            var products = (await GetAllAsync())
+                            .Skip((pageNumber - 1) * pageSize)
+                            .Take(pageSize)
+                            .ToList();
+            return new PagingData<Product>(products, pageNumber, pageSize);
         }
 
-        public async Task<List<Product>> GetProductsByCategoryAsync(int categoryId, int pageSize, int pageNumber)
+        public async Task<PagingData<Product>> GetProductsByCategoryAsync(int categoryId, int pageNumber, int pageSize)
         {
             var products = await dbContext.Products
                 .Where(x => x.CategoryId == categoryId)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
-            return products;
+            return new PagingData<Product>(products, pageNumber, pageSize);
         }
 
         public async Task<List<Product>> GetProductsByIdsAsync(IEnumerable<int> ids)

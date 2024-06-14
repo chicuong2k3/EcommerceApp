@@ -1,4 +1,5 @@
 ﻿using EcommerceApp.Domain.Models;
+using EcommerceApp.Domain.Shared;
 
 namespace EcommerceApp.Domain.Interfaces
 {
@@ -8,9 +9,9 @@ namespace EcommerceApp.Domain.Interfaces
 
         //Task<bool> RemoveFromCategoryAsync(int categoryId, int productId);
 
-        Task<List<Product>> GetAllProductsAsync(int pageSize, int pageNumber);
+        Task<PagingData<Product>> GetAllProductsAsync(int pageNumber, int pageSize);
 
-        Task<List<Product>> GetProductsByCategoryAsync(int categoryId, int pageSize, int pageNumber);
+        Task<PagingData<Product>> GetProductsByCategoryAsync(int categoryId, int pageNumber, int pageSize);
 
         Task<List<Product>> GetProductsByIdsAsync(IEnumerable<int> ids);
     }

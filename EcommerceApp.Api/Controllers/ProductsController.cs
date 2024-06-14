@@ -5,8 +5,10 @@ using EcommerceApp.Api.ModelBinders;
 using EcommerceApp.Api.Services.Interfaces;
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
+using EcommerceApp.Domain.Shared;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace EcommerceApp.Api.Controllers
 {
@@ -28,18 +30,22 @@ namespace EcommerceApp.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] ProductQueryParameters queryParameters)
         {
-            ICollection<Product> products;
+            PagingData<Product> pagingData;
             if (queryParameters.CategoryId <= 0)
             {
-                products = await productRepository.GetAllProductsAsync(queryParameters.PageSize, queryParameters.PageNumber);
+                pagingData = await productRepository.GetAllProductsAsync(queryParameters.PageNumber, queryParameters.PageSize);
             }
             else
             {
-                products = await productRepository.GetProductsByCategoryAsync(queryParameters.CategoryId, queryParameters.PageSize, queryParameters.PageNumber);
+                pagingData = await productRepository.GetProductsByCategoryAsync(queryParameters.CategoryId, queryParameters.PageNumber, queryParameters.PageSize);
             }
 
-            var productGetDtos = mapper.Map<List<ProductGetDto>>(products);
-            return Ok(productGetDtos);
+            var pagingDataDto = mapper.Map<PagingDataDto<ProductGetDto>>(pagingData);
+
+            Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(pagingDataDto));
+
+
+            return Ok(pagingData.Items);
         }
 
         [HttpGet("{id}")]
