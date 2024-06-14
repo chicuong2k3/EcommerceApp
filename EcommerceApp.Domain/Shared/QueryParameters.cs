@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EcommerceApp.Api.Dtos
+namespace EcommerceApp.Domain.Shared
 {
-    public abstract class QueryParameters 
+    public abstract class QueryParameters
     {
         [Range(1, 50)]
         public int PageSize { get; set; } = 5;

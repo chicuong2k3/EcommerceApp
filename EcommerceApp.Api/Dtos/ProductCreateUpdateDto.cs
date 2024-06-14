@@ -1,5 +1,4 @@
-﻿using EcommerceApp.Api.CusomAttributes;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
+﻿using EcommerceApp.Domain.CusomAttributes;
 using System.ComponentModel.DataAnnotations;
 
 namespace EcommerceApp.Api.Dtos

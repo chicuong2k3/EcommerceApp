@@ -7,7 +7,7 @@
 namespace EcommerceApp.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class dbseeding : Migration
+    public partial class seeding : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -126,21 +126,21 @@ namespace EcommerceApp.DAL.Migrations
                 columns: new[] { "Id", "CategoryId", "Description", "Name", "PhotoUrl", "Price", "SalePrice" },
                 values: new object[,]
                 {
-                    { 1, 1, null, "Laptop mini Samsung N150", null, 2690000m, 2090000m },
-                    { 2, 1, null, "Laptop Dell Latitude. i5 M520 ram 8G 500Gb", null, 2690000m, 2090000m },
-                    { 3, 1, null, "Laptop cũ dell latitude e7280 i7 7600u ram 8gb", null, 2690000m, 2090000m },
-                    { 4, 1, null, "Laptop Dell bền bỉ i5 2.4Ghz", null, 2690000m, 2090000m },
-                    { 5, 1, null, "TOSHIBA RAM 8G. i5 4300M upto 3.3Ghz 2.6GHZ", null, 2690000m, 2090000m },
-                    { 6, 2, null, "Điện thoại Xiaomi Redmi 9A 2GB-32GB", null, 2690000m, 2090000m },
-                    { 7, 2, null, "Điện thoại Oppo F11 Ram 8GB/ 256GB", null, 2690000m, 2090000m },
-                    { 8, 2, null, "Xiaomi Redmi 13C Ram 8GB/ 256GB", null, 2690000m, 2090000m },
-                    { 9, 2, null, "Realme C33 Ram 8GB/ 256GB", null, 2690000m, 2090000m },
-                    { 10, 2, null, "Điện thoại Oppo Reno 4z 5G Ram 12GB/256GB", null, 2690000m, 2090000m },
-                    { 11, 3, null, "ĐỒNG HỒ TRẺ EM COOBOS", null, 2690000m, 2090000m },
-                    { 12, 3, null, "Đồng hồ Nam ROMATIC DOMINIC", null, 2690000m, 2090000m },
+                    { 1, 1, null, "Laptop mini Samsung N150", null, 8690000m, 8290000m },
+                    { 2, 1, null, "Laptop Dell Latitude. i5 M520 ram 8G 500Gb", null, 12690000m, 11690000m },
+                    { 3, 1, null, "Laptop cũ dell latitude e7280 i7 7600u ram 8gb", null, 5690000m, 5090000m },
+                    { 4, 1, null, "Laptop Dell bền bỉ i5 2.4Ghz", null, 3690000m, 3300000m },
+                    { 5, 1, null, "TOSHIBA RAM 8G. i5 4300M upto 3.3Ghz 2.6GHZ", null, 10690000m, 9690000m },
+                    { 6, 2, null, "Điện thoại Xiaomi Redmi 9A 2GB-32GB", null, 4690000m, 3700000m },
+                    { 7, 2, null, "Điện thoại Oppo F11 Ram 8GB/ 256GB", null, 1690000m, 1500000m },
+                    { 8, 2, null, "Xiaomi Redmi 13C Ram 8GB/ 256GB", null, 5690000m, 4690000m },
+                    { 9, 2, null, "Realme C33 Ram 8GB/ 256GB", null, 1700000m, 1500000m },
+                    { 10, 2, null, "Điện thoại Oppo Reno 4z 5G Ram 12GB/256GB", null, 3200000m, 3100000m },
+                    { 11, 3, null, "ĐỒNG HỒ TRẺ EM COOBOS", null, 590000m, 520000m },
+                    { 12, 3, null, "Đồng hồ Nam ROMATIC DOMINIC", null, 1590000m, 1290000m },
                     { 13, 3, null, "Đồng Hồ Nam Thời Trang Doanh Nhân Dây Da PU", null, 2690000m, 2090000m },
-                    { 14, 3, null, "Đồng hồ Nữ VENUS Hàn Quốc", null, 2690000m, 2090000m },
-                    { 15, 3, null, "Đồng hồ đôi NEOS N-30932M", null, 2690000m, 2090000m }
+                    { 14, 3, null, "Đồng hồ Nữ VENUS Hàn Quốc", null, 3690000m, 3190000m },
+                    { 15, 3, null, "Đồng hồ đôi NEOS N-30932M", null, 4200000m, 4000000m }
                 });
 
             migrationBuilder.CreateIndex(

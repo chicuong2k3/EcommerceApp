@@ -23,7 +23,7 @@ namespace EcommerceApp.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var categories = await categoryRepository.GetAllAsync();
+            var categories = await categoryRepository.GetCategoriesAsync();
 
             var categoryGetDtos = mapper.Map<List<CategoryGetDto>>(categories);
 

@@ -1,5 +1,6 @@
 ﻿using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApp.DAL.Repositories
 {
@@ -7,6 +8,11 @@ namespace EcommerceApp.DAL.Repositories
     {
         public CategoryRepository(AppDbContext dbContext) : base(dbContext)
         {
+        }
+
+        public async Task<List<Category>> GetCategoriesAsync()
+        {
+            return await dbContext.Categories.ToListAsync();
         }
     }
 }

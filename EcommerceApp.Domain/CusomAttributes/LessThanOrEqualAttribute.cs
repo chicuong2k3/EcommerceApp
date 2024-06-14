@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EcommerceApp.Api.CusomAttributes
+namespace EcommerceApp.Domain.CusomAttributes
 {
-    public class LessThanAttribute : ValidationAttribute
+    public class LessThanOrEqualAttribute : ValidationAttribute
     {
         private readonly string propertyToCompareName;
-        public LessThanAttribute(string propName)
+        public LessThanOrEqualAttribute(string propName)
         {
             propertyToCompareName = propName;
         }
@@ -28,10 +28,10 @@ namespace EcommerceApp.Api.CusomAttributes
             var comparableValue = value as IComparable;
             var comparableValueToCompare = propertyToCompareValue as IComparable;
 
-            if (comparableValue != null && comparableValueToCompare != null 
-                && comparableValue.CompareTo(comparableValueToCompare) >= 0)
+            if (comparableValue != null && comparableValueToCompare != null
+                && comparableValue.CompareTo(comparableValueToCompare) > 0)
             {
-                return new ValidationResult($"The {validationContext.DisplayName} must be less than {propertyToCompareName}.");
+                return new ValidationResult($"The {validationContext.DisplayName} must be less than or equal to {propertyToCompareName}.");
             }
 
             return ValidationResult.Success;

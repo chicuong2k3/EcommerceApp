@@ -33,12 +33,6 @@ namespace EcommerceApp.DAL.Repositories
             return true;
         }
 
-        public async Task<List<T>> GetAllAsync()
-        {
-            var entities = await dbContext.Set<T>().ToListAsync();
-            return entities;
-        }
-
         public async Task<T?> GetByIdAsync(int id)
         {
             var entity = await dbContext.Set<T>().FindAsync(id);

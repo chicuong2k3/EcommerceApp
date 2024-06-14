@@ -28,17 +28,10 @@ namespace EcommerceApp.Api.Controllers
         }
 
         [HttpGet]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> GetAll([FromQuery] ProductQueryParameters queryParameters)
         {
-            PagingData<Product> pagingData;
-            if (queryParameters.CategoryId <= 0)
-            {
-                pagingData = await productRepository.GetAllProductsAsync(queryParameters.PageNumber, queryParameters.PageSize);
-            }
-            else
-            {
-                pagingData = await productRepository.GetProductsByCategoryAsync(queryParameters.CategoryId, queryParameters.PageNumber, queryParameters.PageSize);
-            }
+            PagingData<Product> pagingData = await productRepository.GetProductsAsync(queryParameters); ;
 
             var pagingDataDto = mapper.Map<PagingDataDto<ProductGetDto>>(pagingData);
 
