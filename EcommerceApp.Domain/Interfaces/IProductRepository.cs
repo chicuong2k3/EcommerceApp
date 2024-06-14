@@ -8,6 +8,8 @@ namespace EcommerceApp.Domain.Interfaces
 
         //Task<bool> RemoveFromCategoryAsync(int categoryId, int productId);
 
+        Task<List<Product>> GetAllProductsAsync(int pageSize, int pageNumber);
+
         Task<List<Product>> GetProductsByCategoryAsync(int categoryId, int pageSize, int pageNumber);
 
         Task<List<Product>> GetProductsByIdsAsync(IEnumerable<int> ids);

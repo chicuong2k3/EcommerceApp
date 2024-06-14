@@ -2,10 +2,12 @@
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace EcommerceApp.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class AddSalePrice : Migration
+    public partial class dbseeding : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -46,7 +48,7 @@ namespace EcommerceApp.DAL.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     SalePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PhotoUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -107,6 +109,38 @@ namespace EcommerceApp.DAL.Migrations
                         column: x => x.ShoppingCartId,
                         principalTable: "ShoppingCarts",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.InsertData(
+                table: "Categories",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Laptop" },
+                    { 2, "Điện thoại" },
+                    { 3, "Đồng hồ" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Products",
+                columns: new[] { "Id", "CategoryId", "Description", "Name", "PhotoUrl", "Price", "SalePrice" },
+                values: new object[,]
+                {
+                    { 1, 1, null, "Laptop mini Samsung N150", null, 2690000m, 2090000m },
+                    { 2, 1, null, "Laptop Dell Latitude. i5 M520 ram 8G 500Gb", null, 2690000m, 2090000m },
+                    { 3, 1, null, "Laptop cũ dell latitude e7280 i7 7600u ram 8gb", null, 2690000m, 2090000m },
+                    { 4, 1, null, "Laptop Dell bền bỉ i5 2.4Ghz", null, 2690000m, 2090000m },
+                    { 5, 1, null, "TOSHIBA RAM 8G. i5 4300M upto 3.3Ghz 2.6GHZ", null, 2690000m, 2090000m },
+                    { 6, 2, null, "Điện thoại Xiaomi Redmi 9A 2GB-32GB", null, 2690000m, 2090000m },
+                    { 7, 2, null, "Điện thoại Oppo F11 Ram 8GB/ 256GB", null, 2690000m, 2090000m },
+                    { 8, 2, null, "Xiaomi Redmi 13C Ram 8GB/ 256GB", null, 2690000m, 2090000m },
+                    { 9, 2, null, "Realme C33 Ram 8GB/ 256GB", null, 2690000m, 2090000m },
+                    { 10, 2, null, "Điện thoại Oppo Reno 4z 5G Ram 12GB/256GB", null, 2690000m, 2090000m },
+                    { 11, 3, null, "ĐỒNG HỒ TRẺ EM COOBOS", null, 2690000m, 2090000m },
+                    { 12, 3, null, "Đồng hồ Nam ROMATIC DOMINIC", null, 2690000m, 2090000m },
+                    { 13, 3, null, "Đồng Hồ Nam Thời Trang Doanh Nhân Dây Da PU", null, 2690000m, 2090000m },
+                    { 14, 3, null, "Đồng hồ Nữ VENUS Hàn Quốc", null, 2690000m, 2090000m },
+                    { 15, 3, null, "Đồng hồ đôi NEOS N-30932M", null, 2690000m, 2090000m }
                 });
 
             migrationBuilder.CreateIndex(

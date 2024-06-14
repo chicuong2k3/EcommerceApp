@@ -31,7 +31,7 @@ namespace EcommerceApp.Api.Controllers
             ICollection<Product> products;
             if (queryParameters.CategoryId <= 0)
             {
-                products = await productRepository.GetAllAsync(queryParameters.PageSize, queryParameters.PageNumber);
+                products = await productRepository.GetAllProductsAsync(queryParameters.PageSize, queryParameters.PageNumber);
             }
             else
             {

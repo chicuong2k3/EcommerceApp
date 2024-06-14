@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcommerceApp.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240614051606_AddSalePrice")]
-    partial class AddSalePrice
+    [Migration("20240614133258_dbseeding")]
+    partial class dbseeding
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,6 +40,23 @@ namespace EcommerceApp.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Laptop"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Điện thoại"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Đồng hồ"
+                        });
                 });
 
             modelBuilder.Entity("EcommerceApp.Domain.Models.Customer", b =>
@@ -83,7 +100,6 @@ namespace EcommerceApp.DAL.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -104,6 +120,128 @@ namespace EcommerceApp.DAL.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CategoryId = 1,
+                            Name = "Laptop mini Samsung N150",
+                            Price = 2690000m,
+                            SalePrice = 2090000m
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CategoryId = 1,
+                            Name = "Laptop Dell Latitude. i5 M520 ram 8G 500Gb",
+                            Price = 2690000m,
+                            SalePrice = 2090000m
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CategoryId = 1,
+                            Name = "Laptop cũ dell latitude e7280 i7 7600u ram 8gb",
+                            Price = 2690000m,
+                            SalePrice = 2090000m
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CategoryId = 1,
+                            Name = "Laptop Dell bền bỉ i5 2.4Ghz",
+                            Price = 2690000m,
+                            SalePrice = 2090000m
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CategoryId = 1,
+                            Name = "TOSHIBA RAM 8G. i5 4300M upto 3.3Ghz 2.6GHZ",
+                            Price = 2690000m,
+                            SalePrice = 2090000m
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CategoryId = 2,
+                            Name = "Điện thoại Xiaomi Redmi 9A 2GB-32GB",
+                            Price = 2690000m,
+                            SalePrice = 2090000m
+                        },
+                        new
+                        {
+                            Id = 7,
+                            CategoryId = 2,
+                            Name = "Điện thoại Oppo F11 Ram 8GB/ 256GB",
+                            Price = 2690000m,
+                            SalePrice = 2090000m
+                        },
+                        new
+                        {
+                            Id = 8,
+                            CategoryId = 2,
+                            Name = "Xiaomi Redmi 13C Ram 8GB/ 256GB",
+                            Price = 2690000m,
+                            SalePrice = 2090000m
+                        },
+                        new
+                        {
+                            Id = 9,
+                            CategoryId = 2,
+                            Name = "Realme C33 Ram 8GB/ 256GB",
+                            Price = 2690000m,
+                            SalePrice = 2090000m
+                        },
+                        new
+                        {
+                            Id = 10,
+                            CategoryId = 2,
+                            Name = "Điện thoại Oppo Reno 4z 5G Ram 12GB/256GB",
+                            Price = 2690000m,
+                            SalePrice = 2090000m
+                        },
+                        new
+                        {
+                            Id = 11,
+                            CategoryId = 3,
+                            Name = "ĐỒNG HỒ TRẺ EM COOBOS",
+                            Price = 2690000m,
+                            SalePrice = 2090000m
+                        },
+                        new
+                        {
+                            Id = 12,
+                            CategoryId = 3,
+                            Name = "Đồng hồ Nam ROMATIC DOMINIC",
+                            Price = 2690000m,
+                            SalePrice = 2090000m
+                        },
+                        new
+                        {
+                            Id = 13,
+                            CategoryId = 3,
+                            Name = "Đồng Hồ Nam Thời Trang Doanh Nhân Dây Da PU",
+                            Price = 2690000m,
+                            SalePrice = 2090000m
+                        },
+                        new
+                        {
+                            Id = 14,
+                            CategoryId = 3,
+                            Name = "Đồng hồ Nữ VENUS Hàn Quốc",
+                            Price = 2690000m,
+                            SalePrice = 2090000m
+                        },
+                        new
+                        {
+                            Id = 15,
+                            CategoryId = 3,
+                            Name = "Đồng hồ đôi NEOS N-30932M",
+                            Price = 2690000m,
+                            SalePrice = 2090000m
+                        });
                 });
 
             modelBuilder.Entity("EcommerceApp.Domain.Models.ShoppingCart", b =>

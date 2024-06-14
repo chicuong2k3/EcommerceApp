@@ -11,10 +11,7 @@ namespace EcommerceApp.Api.Dtos
         [MaxLength(50)]
         public string Name { get; set; }
 
-        [Required]
-        [MinLength(10)]
-        [MaxLength(500)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [Range(0.0, 1000000000.0)]
         public decimal Price { get; set; }

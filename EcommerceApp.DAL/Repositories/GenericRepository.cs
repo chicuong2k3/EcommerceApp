@@ -33,12 +33,9 @@ namespace EcommerceApp.DAL.Repositories
             return true;
         }
 
-        public async Task<List<T>> GetAllAsync(int pageSize, int pageNumber)
+        public async Task<List<T>> GetAllAsync()
         {
-            var entities = await dbContext.Set<T>()
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var entities = await dbContext.Set<T>().ToListAsync();
             return entities;
         }
 
