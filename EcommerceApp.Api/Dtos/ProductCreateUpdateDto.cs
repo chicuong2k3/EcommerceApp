@@ -22,7 +22,7 @@ namespace EcommerceApp.Api.Dtos
 
         [Required]
         [Range(0.0, 1000000000.0)]
-        [ProductSalePrice]
+        [LessThan(nameof(Price))]
         public decimal SalePrice { get; set; }
 
         [Range(1, int.MaxValue)]
