@@ -2,7 +2,7 @@
 {
     public interface IGenericRepository<T> where T : class
     {
-        Task<List<T>> GetAllAsync();
+        Task<List<T>> GetAllAsync(int pageSize, int pageNumber);
 
         Task<T?> GetByIdAsync(int id);
 

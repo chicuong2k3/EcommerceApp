@@ -10,10 +10,12 @@ namespace EcommerceApp.DAL.Repositories
         {
         }
 
-        public async Task<List<Product>> GetProductsByCategoryAsync(int categoryId)
+        public async Task<List<Product>> GetProductsByCategoryAsync(int categoryId, int pageSize, int pageNumber)
         {
             var products = await dbContext.Products
                 .Where(x => x.CategoryId == categoryId)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
             return products;
         }

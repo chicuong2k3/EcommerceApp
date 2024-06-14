@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Azure;
 using EcommerceApp.Api.CustomFilters;
 using EcommerceApp.Api.Dtos;
 using EcommerceApp.Api.ModelBinders;
@@ -27,16 +26,16 @@ namespace EcommerceApp.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] int categoryId)
+        public async Task<IActionResult> GetAll([FromQuery] ProductQueryParameters queryParameters)
         {
             ICollection<Product> products;
-            if (categoryId <= 0)
+            if (queryParameters.CategoryId <= 0)
             {
-                products = await productRepository.GetAllAsync();
+                products = await productRepository.GetAllAsync(queryParameters.PageSize, queryParameters.PageNumber);
             }
             else
             {
-                products = await productRepository.GetProductsByCategoryAsync(categoryId);
+                products = await productRepository.GetProductsByCategoryAsync(queryParameters.CategoryId, queryParameters.PageSize, queryParameters.PageNumber);
             }
 
             var productGetDtos = mapper.Map<List<ProductGetDto>>(products);
