@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using Azure;
 using EcommerceApp.Api.Dtos;
 using EcommerceApp.Api.ModelBinders;
 using EcommerceApp.Api.Services.Interfaces;
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EcommerceApp.Api.Controllers
@@ -56,9 +58,19 @@ namespace EcommerceApp.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ProductPostPutDto productPostPutDto)
+        public async Task<IActionResult> Create([FromBody] ProductCreateUpdateDto productCreateUpdateDto)
         {
-            var product = mapper.Map<Product>(productPostPutDto);
+            if (productCreateUpdateDto == null)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return UnprocessableEntity(ModelState);
+            }
+
+            var product = mapper.Map<Product>(productCreateUpdateDto);
 
             var addedProduct = await productRepository.InsertAsync(product);
 
@@ -68,9 +80,19 @@ namespace EcommerceApp.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ProductPostPutDto productPostPutDto)
+        public async Task<IActionResult> Update(int id, [FromBody] ProductCreateUpdateDto productCreateUpdateDto)
         {
-            var updatedProduct = mapper.Map<Product>(productPostPutDto);
+            if (productCreateUpdateDto == null)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return UnprocessableEntity(ModelState);
+            }
+
+            var updatedProduct = mapper.Map<Product>(productCreateUpdateDto);
             updatedProduct.Id = id;
 
             var success = await productRepository.UpdateAsync(id, updatedProduct);
@@ -105,10 +127,20 @@ namespace EcommerceApp.Api.Controllers
         }
 
         [HttpPost("collection")]
-        public async Task<IActionResult> CreateProductList(IEnumerable<ProductPostPutDto> productPostPutDtos)
+        public async Task<IActionResult> CreateProductList(IEnumerable<ProductCreateUpdateDto> productCreateUpdateDtos)
         {
+            if (productCreateUpdateDtos == null)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return UnprocessableEntity(ModelState);
+            }
+
             var result = new List<ProductGetDto>();
-            var products = mapper.Map<IEnumerable<Product>>(productPostPutDtos);
+            var products = mapper.Map<IEnumerable<Product>>(productCreateUpdateDtos);
             foreach (var product in products)
             {
                 var addedProduct = await productRepository.InsertAsync(product);
@@ -116,6 +148,44 @@ namespace EcommerceApp.Api.Controllers
             }
 
             return CreatedAtAction(nameof(GetProductCollection), new { ids = string.Join(",", products.Select(p => p.Id)) }, result);
+        }
+
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> PartiallyUpdate(int id, [FromBody] JsonPatchDocument<ProductCreateUpdateDto> patchDocument)
+        {
+            if (patchDocument == null)
+            {
+                return BadRequest();
+            }
+
+            var product = await productRepository.GetByIdAsync(id);
+
+            if (product == null)
+            {
+                return NotFound($"Cannot find the product to update.");
+            }
+
+            var productCreateUpdateDto = mapper.Map<ProductCreateUpdateDto>(product);
+
+            patchDocument.ApplyTo(productCreateUpdateDto, ModelState);
+
+            TryValidateModel(productCreateUpdateDto);
+            if (!ModelState.IsValid)
+            {
+                return UnprocessableEntity(ModelState);
+            }
+
+            var updatedProduct = mapper.Map<Product>(productCreateUpdateDto);
+            updatedProduct.Id = id;
+
+            var success = await productRepository.UpdateAsync(id, updatedProduct);
+
+            if (!success)
+            {
+                return NotFound($"Cannot find the product to update.");
+            }
+
+            return NoContent();
         }
     }
 }

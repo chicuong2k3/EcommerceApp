@@ -2,7 +2,7 @@
 
 namespace EcommerceApp.Api.Dtos
 {
-    public class CategoryPostPutDto
+    public class CategoryCreateUpdateDto
     {
         [Required]
         [MinLength(3)]

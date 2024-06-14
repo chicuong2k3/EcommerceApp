@@ -39,32 +39,6 @@ namespace EcommerceApp.DAL.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("EcommerceApp.Domain.Models.ContactDetail", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("EmailAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId");
-
-                    b.ToTable("ContactDetails");
-                });
-
             modelBuilder.Entity("EcommerceApp.Domain.Models.Customer", b =>
                 {
                     b.Property<int>("Id")
@@ -73,7 +47,15 @@ namespace EcommerceApp.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("EmailAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -109,6 +91,9 @@ namespace EcommerceApp.DAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("SalePrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -165,17 +150,6 @@ namespace EcommerceApp.DAL.Migrations
                     b.ToTable("ShoppingCartItems");
                 });
 
-            modelBuilder.Entity("EcommerceApp.Domain.Models.ContactDetail", b =>
-                {
-                    b.HasOne("EcommerceApp.Domain.Models.Customer", "Customer")
-                        .WithMany("ContactDetails")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
-                });
-
             modelBuilder.Entity("EcommerceApp.Domain.Models.Product", b =>
                 {
                     b.HasOne("EcommerceApp.Domain.Models.Category", "Category")
@@ -216,11 +190,6 @@ namespace EcommerceApp.DAL.Migrations
             modelBuilder.Entity("EcommerceApp.Domain.Models.Category", b =>
                 {
                     b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("EcommerceApp.Domain.Models.Customer", b =>
-                {
-                    b.Navigation("ContactDetails");
                 });
 
             modelBuilder.Entity("EcommerceApp.Domain.Models.ShoppingCart", b =>

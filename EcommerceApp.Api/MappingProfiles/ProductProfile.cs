@@ -10,7 +10,7 @@ namespace EcommerceApp.Api.MappingProfiles
         {
             CreateMap<Product, ProductGetDto>()
                 .ReverseMap();
-            CreateMap<Product, ProductPostPutDto>().ReverseMap();
+            CreateMap<Product, ProductCreateUpdateDto>().ReverseMap();
         }
     }
 }

@@ -45,9 +45,19 @@ namespace EcommerceApp.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CategoryPostPutDto categoryPostPutDto)
+        public async Task<IActionResult> Create([FromBody] CategoryCreateUpdateDto categoryCreateUpdateDto)
         {
-            var category = mapper.Map<Category>(categoryPostPutDto);
+            if (categoryCreateUpdateDto == null)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return UnprocessableEntity(ModelState);
+            }
+
+            var category = mapper.Map<Category>(categoryCreateUpdateDto);
 
             var addedCategory = await categoryRepository.InsertAsync(category);
 
@@ -57,9 +67,19 @@ namespace EcommerceApp.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] CategoryPostPutDto categoryPostPutDto)
+        public async Task<IActionResult> Update(int id, [FromBody] CategoryCreateUpdateDto categoryCreateUpdateDto)
         {
-            var updatedCategory = mapper.Map<Category>(categoryPostPutDto);
+            if (categoryCreateUpdateDto == null)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return UnprocessableEntity(ModelState);
+            }
+
+            var updatedCategory = mapper.Map<Category>(categoryCreateUpdateDto);
             updatedCategory.Id = id;
 
             var success = await categoryRepository.UpdateAsync(id, updatedCategory);
