@@ -1,10 +1,7 @@
-﻿using EcommerceApp.Api.Services.Implementations;
-using EcommerceApp.Api.Services.Interfaces;
-using EcommerceApp.DAL.Repositories;
+﻿using EcommerceApp.DAL.Repositories;
 using EcommerceApp.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using NLog;
 
 namespace EcommerceApp.Api.ExtensionMethods
 {
@@ -14,13 +11,6 @@ namespace EcommerceApp.Api.ExtensionMethods
         {
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
-            return services;
-        }
-
-        public static IServiceCollection AddLogger(this IServiceCollection services)
-        {
-            LogManager.Setup().LoadConfigurationFromFile(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
-            services.AddSingleton<ILoggerService, LoggerService>();
             return services;
         }
 

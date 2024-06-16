@@ -3,7 +3,6 @@ using EcommerceApp.Api.CustomFilters;
 using EcommerceApp.Api.Dtos;
 using EcommerceApp.Api.HATEOAS;
 using EcommerceApp.Api.ModelBinders;
-using EcommerceApp.Api.Services.Interfaces;
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
 using EcommerceApp.Domain.Shared;
@@ -19,12 +18,15 @@ namespace EcommerceApp.Api.Controllers
     public class ProductsController : RestControllerBase
     {
         private readonly IProductRepository productRepository;
+        private readonly ILogger<ProductsController> logger;
+
         public ProductsController(IProductRepository productRepository,
             IMapper mapper,
-            ILoggerService logger,
-            ILinkService linkService) : base(mapper, logger, linkService)
+            ILogger<ProductsController> logger,
+            ILinkService linkService) : base(mapper, linkService)
         {
             this.productRepository = productRepository;
+            this.logger = logger;
         }
 
         [HttpGet]
@@ -46,6 +48,7 @@ namespace EcommerceApp.Api.Controllers
         [ServiceFilter(typeof(ValidateMediaTypeAttribute))]
         public async Task<IActionResult> GetById(int id)
         {
+            logger.LogInformation("Get product by id");
             var product = await productRepository.GetByIdAsync(id);
 
             if (product == null)

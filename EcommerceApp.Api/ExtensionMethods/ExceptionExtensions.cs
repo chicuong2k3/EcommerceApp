@@ -1,7 +1,5 @@
-﻿using EcommerceApp.Api.Services.Interfaces;
-using EcommerceApp.Domain.Exceptions;
+﻿using EcommerceApp.Domain.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
 using System.Text.Json;
 
 namespace EcommerceApp.Api.ExtensionMethods
@@ -25,7 +23,6 @@ namespace EcommerceApp.Api.ExtensionMethods
     {
         public static void UseCustomExceptionHandler(this WebApplication app)
         {
-            var logger = app.Services.GetService<ILoggerService>();
 
             app.UseExceptionHandler(error =>
             {
@@ -42,7 +39,6 @@ namespace EcommerceApp.Api.ExtensionMethods
                             _ => StatusCodes.Status500InternalServerError
                         };
 
-                        logger.LogError($"Something went wrong: {contextFeature.Error}");
 
                         await context.Response.WriteAsync(new ErrorDetail()
                         {

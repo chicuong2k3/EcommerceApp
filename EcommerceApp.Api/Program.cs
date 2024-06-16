@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using EcommerceApp.Api.CustomFilters;
 using EcommerceApp.Api.HATEOAS;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +17,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.AddLogger();
 builder.Services.AddRepository();
 builder.Services.AddAutoMapper(typeof(Program));
 
@@ -74,7 +74,14 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration)
+);
+
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -83,6 +90,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseCustomExceptionHandler();
 }
+
+app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 
