@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using EcommerceApp.Api.CustomFilters;
 using EcommerceApp.Api.Dtos;
+using EcommerceApp.Api.HATEOAS;
 using EcommerceApp.Api.ModelBinders;
 using EcommerceApp.Api.Services.Interfaces;
 using EcommerceApp.Domain.Interfaces;
@@ -12,23 +13,23 @@ using System.Text.Json;
 
 namespace EcommerceApp.Api.Controllers
 {
-    [ApiController]
+
     [Route("/api/[controller]")]
-    public class ProductsController : ControllerBase
+    
+    public class ProductsController : RestControllerBase
     {
         private readonly IProductRepository productRepository;
-        private readonly IMapper mapper;
-        private readonly ILoggerService logger;
-
-        public ProductsController(IProductRepository productRepository, IMapper mapper, ILoggerService logger)
+        public ProductsController(IProductRepository productRepository,
+            IMapper mapper,
+            ILoggerService logger,
+            ILinkService linkService) : base(mapper, logger, linkService)
         {
             this.productRepository = productRepository;
-            this.mapper = mapper;
-            this.logger = logger;
         }
 
         [HttpGet]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
+        
         public async Task<IActionResult> GetAll([FromQuery] ProductQueryParameters queryParameters)
         {
             PagingData<Product> pagingData = await productRepository.GetProductsAsync(queryParameters); ;
@@ -42,6 +43,7 @@ namespace EcommerceApp.Api.Controllers
         }
 
         [HttpGet("{id}")]
+        [ServiceFilter(typeof(ValidateMediaTypeAttribute))]
         public async Task<IActionResult> GetById(int id)
         {
             var product = await productRepository.GetByIdAsync(id);
@@ -52,6 +54,12 @@ namespace EcommerceApp.Api.Controllers
             }
 
             var productGetDto = mapper.Map<ProductGetDto>(product);
+
+            if (ShouldGenerateLinks())
+            {
+                var link = linkService.GenerateLink(nameof(GetById), new { id = productGetDto.Id }, "self", HttpMethod.Get.ToString());
+                productGetDto.Links.Add(link);
+            }
 
             return Ok(productGetDto);
         }

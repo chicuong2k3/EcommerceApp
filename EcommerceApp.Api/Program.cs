@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using EcommerceApp.Api.CustomFilters;
+using EcommerceApp.Api.HATEOAS;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,8 +46,16 @@ builder.Services.AddControllers(config =>
     .AddCSVFormatter()
     .AddApplicationPart(typeof(Program).Assembly);
 
+// Add Custom Media Type
+builder.Services.AddCustomMediaTypes();
+
 // Add Filters
 builder.Services.AddScoped<ValidationFilterAttribute>();
+builder.Services.AddScoped<ValidateMediaTypeAttribute>();
+
+// 
+builder.Services.AddScoped<ILinkService, LinkService>();
+builder.Services.AddHttpContextAccessor();
 
 // Add CORS
 builder.Services.AddCors(options =>

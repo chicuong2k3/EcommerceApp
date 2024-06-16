@@ -1,9 +1,6 @@
 ﻿using EcommerceApp.Api.Dtos;
-using EcommerceApp.Domain.Models;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Net.Http.Headers;
-using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace EcommerceApp.Api.Formatters
@@ -24,6 +21,7 @@ namespace EcommerceApp.Api.Formatters
                 return base.CanWriteType(type);
             }
             return false;
+            return true;
         }
 
         private static void FormatCsv(StringBuilder buffer, CategoryGetDto categoryGetDto)

@@ -13,8 +13,6 @@ namespace EcommerceApp.Api.CustomFilters
 
         public void OnActionExecuting(ActionExecutingContext context)
         {
-            var controllerName = context.RouteData.Values["controller"];
-            var actionName = context.RouteData.Values["action"];
             var actionDescriptor = context.ActionDescriptor as ControllerActionDescriptor;
 
             if (actionDescriptor != null)

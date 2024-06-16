@@ -1,6 +1,4 @@
 ﻿using EcommerceApp.Domain.Models;
-using System.Reflection;
-using System.Text;
 using System.Linq.Dynamic.Core;
 
 namespace EcommerceApp.Domain.Shared

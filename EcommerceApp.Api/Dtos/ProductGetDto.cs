@@ -1,4 +1,6 @@
-﻿namespace EcommerceApp.Api.Dtos
+﻿using EcommerceApp.Api.HATEOAS;
+
+namespace EcommerceApp.Api.Dtos
 {
     public record ProductGetDto
     {
@@ -9,5 +11,7 @@
         public decimal SalePrice { get; set; }
         public string PhotoUrl { get; init; }
         public int CategoryId { get; init; }
+
+        public List<Link> Links { get; set; } = new List<Link>();   
     }
 }
