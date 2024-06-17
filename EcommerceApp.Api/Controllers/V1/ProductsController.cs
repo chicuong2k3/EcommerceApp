@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
-namespace EcommerceApp.Api.Controllers
+namespace EcommerceApp.Api.Controllers.V1
 {
     [ApiController]
     [Route("/api/[controller]")]
@@ -113,7 +113,7 @@ namespace EcommerceApp.Api.Controllers
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> CreateProductList(IEnumerable<ProductCreateUpdateDto> productCreateUpdateDtos)
         {
-            
+
             var result = new List<ProductGetDto>();
             var products = mapper.Map<IEnumerable<Product>>(productCreateUpdateDtos);
             foreach (var product in products)

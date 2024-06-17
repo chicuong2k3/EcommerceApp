@@ -29,7 +29,8 @@ builder.Services.AddControllers(config =>
     config.RespectBrowserAcceptHeader = true;
     config.ReturnHttpNotAcceptable = true; // return 406 status code if clients negotiate for media type the server does not support
 
-    config.OutputFormatters.Insert(0, new CsvOutputFormatter());
+
+    config.OutputFormatters.Add(new CsvOutputFormatter());
 
     // config.Filters.Add(); // add global action filters
 })
@@ -64,6 +65,9 @@ builder.Services.AddSwaggerGen();
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration)
 );
+
+// Api Versioning
+builder.Services.AddApiVersioningConfiguration();
 
 var app = builder.Build();
 

@@ -1,12 +1,14 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using AutoMapper;
 using EcommerceApp.Api.CustomFilters;
 using EcommerceApp.Api.Dtos;
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EcommerceApp.Api.Controllers
+namespace EcommerceApp.Api.Controllers.V1
 {
+    [ApiVersion("1.0", Deprecated = true)]
     [ApiController]
     [Route("/api/[controller]")]
     public class CategoriesController : ControllerBase
@@ -24,9 +26,9 @@ namespace EcommerceApp.Api.Controllers
         public async Task<IActionResult> GetAll()
         {
             var categories = await categoryRepository.GetCategoriesAsync();
-            
+
             var data = mapper.Map<List<CategoryGetDto>>(categories);
-            
+
             return Ok(data);
         }
 
