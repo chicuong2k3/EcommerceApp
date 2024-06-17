@@ -7,6 +7,7 @@ using EcommerceApp.Domain.Models;
 using EcommerceApp.Domain.Shared;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace EcommerceApp.Api.Controllers
 {
@@ -28,6 +29,7 @@ namespace EcommerceApp.Api.Controllers
         }
 
         [HttpGet]
+        [HttpHead]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> GetAll([FromQuery] ProductQueryParameters queryParameters)
         {
@@ -35,7 +37,7 @@ namespace EcommerceApp.Api.Controllers
 
             var pagingDataDto = mapper.Map<PagingDataDto<ProductGetDto>>(pagingData);
 
-            //Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(pagingDataDto));
+            Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(pagingDataDto));
 
             return Ok(pagingDataDto);
         }
@@ -159,6 +161,13 @@ namespace EcommerceApp.Api.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpOptions]
+        public IActionResult GetProductsOptions()
+        {
+            Response.Headers.Append("Allow", "GET, OPTIONS, POST, PUT, DELETE, PATCH");
+            return Ok();
         }
     }
 }

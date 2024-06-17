@@ -51,8 +51,8 @@ builder.Services.AddCors(options =>
     {
         policy.AllowAnyOrigin()
             .AllowAnyMethod()
-            .AllowAnyHeader();
-        //.WithExposedHeaders("X-Pagination");
+            .AllowAnyHeader()
+            .WithExposedHeaders("X-Pagination");
     });
 });
 
