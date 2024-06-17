@@ -1,10 +1,10 @@
-﻿using System.ComponentModel.Design.Serialization;
+﻿
 
 namespace EcommerceApp.Api.Dtos
 {
-    public record CategoryGetDto
+    public class CategoryGetDto
     {
         public int Id { get; init; }
-        public string Name { get; init; }
+        public string Name { get; init; } = string.Empty;
     }
 }

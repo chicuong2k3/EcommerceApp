@@ -9,7 +9,7 @@ namespace EcommerceApp.Api.Controllers
 {
     [ApiController]
     [Route("/api/[controller]")]
-    public class CategoriesController : Controller
+    public class CategoriesController : ControllerBase
     {
         private readonly ICategoryRepository categoryRepository;
         private readonly IMapper mapper;
@@ -24,10 +24,10 @@ namespace EcommerceApp.Api.Controllers
         public async Task<IActionResult> GetAll()
         {
             var categories = await categoryRepository.GetCategoriesAsync();
-
-            var categoryGetDtos = mapper.Map<List<CategoryGetDto>>(categories);
-
-            return Ok(categoryGetDtos);
+            
+            var data = mapper.Map<List<CategoryGetDto>>(categories);
+            
+            return Ok(data);
         }
 
         [HttpGet("{id}")]

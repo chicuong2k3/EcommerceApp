@@ -1,54 +1,48 @@
 ﻿using AutoMapper;
 using EcommerceApp.Api.CustomFilters;
 using EcommerceApp.Api.Dtos;
-using EcommerceApp.Api.HATEOAS;
 using EcommerceApp.Api.ModelBinders;
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
 using EcommerceApp.Domain.Shared;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace EcommerceApp.Api.Controllers
 {
-
+    [ApiController]
     [Route("/api/[controller]")]
-    
-    public class ProductsController : RestControllerBase
+    public class ProductsController : ControllerBase
     {
         private readonly IProductRepository productRepository;
+        private readonly IMapper mapper;
         private readonly ILogger<ProductsController> logger;
 
         public ProductsController(IProductRepository productRepository,
             IMapper mapper,
-            ILogger<ProductsController> logger,
-            ILinkService linkService) : base(mapper, linkService)
+            ILogger<ProductsController> logger)
         {
             this.productRepository = productRepository;
+            this.mapper = mapper;
             this.logger = logger;
         }
 
         [HttpGet]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
-        
         public async Task<IActionResult> GetAll([FromQuery] ProductQueryParameters queryParameters)
         {
             PagingData<Product> pagingData = await productRepository.GetProductsAsync(queryParameters); ;
 
             var pagingDataDto = mapper.Map<PagingDataDto<ProductGetDto>>(pagingData);
 
-            Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(pagingDataDto));
+            //Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(pagingDataDto));
 
-
-            return Ok(pagingData.Items);
+            return Ok(pagingDataDto);
         }
 
         [HttpGet("{id}")]
-        [ServiceFilter(typeof(ValidateMediaTypeAttribute))]
         public async Task<IActionResult> GetById(int id)
         {
-            logger.LogInformation("Get product by id");
             var product = await productRepository.GetByIdAsync(id);
 
             if (product == null)
@@ -57,12 +51,6 @@ namespace EcommerceApp.Api.Controllers
             }
 
             var productGetDto = mapper.Map<ProductGetDto>(product);
-
-            if (ShouldGenerateLinks())
-            {
-                var link = linkService.GenerateLink(nameof(GetById), new { id = productGetDto.Id }, "self", HttpMethod.Get.ToString());
-                productGetDto.Links.Add(link);
-            }
 
             return Ok(productGetDto);
         }

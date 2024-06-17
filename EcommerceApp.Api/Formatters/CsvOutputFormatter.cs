@@ -21,7 +21,6 @@ namespace EcommerceApp.Api.Formatters
                 return base.CanWriteType(type);
             }
             return false;
-            return true;
         }
 
         private static void FormatCsv(StringBuilder buffer, CategoryGetDto categoryGetDto)
@@ -31,6 +30,7 @@ namespace EcommerceApp.Api.Formatters
 
         public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
         {
+            var response = context.HttpContext.Response;
             var buffer = new StringBuilder();
             var categories = context.Object as IEnumerable<CategoryGetDto>;
             if (categories != null)
@@ -45,7 +45,7 @@ namespace EcommerceApp.Api.Formatters
                 FormatCsv(buffer, context.Object as CategoryGetDto ?? new CategoryGetDto());
             }
 
-            await context.HttpContext.Response.WriteAsync(buffer.ToString());
+            await response.WriteAsync(buffer.ToString());
         }
     }
 }
