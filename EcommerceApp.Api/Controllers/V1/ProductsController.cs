@@ -7,13 +7,14 @@ using EcommerceApp.Domain.Models;
 using EcommerceApp.Domain.Shared;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using System.Text.Json;
 
 namespace EcommerceApp.Api.Controllers.V1
 {
     [ApiController]
     [Route("/api/[controller]")]
-    [ResponseCache(CacheProfileName = "ExpireAfter300s")]
+    //[ResponseCache(CacheProfileName = "ExpireIn300s")]
     public class ProductsController : ControllerBase
     {
         private readonly IProductRepository productRepository;
@@ -31,7 +32,8 @@ namespace EcommerceApp.Api.Controllers.V1
 
         [HttpGet]
         [HttpHead]
-        [ResponseCache(Duration = 100)]
+        //[ResponseCache(Duration = 100)]
+        [OutputCache(Duration = 100)]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> GetAll([FromQuery] ProductQueryParameters queryParameters)
         {

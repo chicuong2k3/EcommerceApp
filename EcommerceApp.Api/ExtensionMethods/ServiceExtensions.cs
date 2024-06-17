@@ -38,6 +38,18 @@ namespace EcommerceApp.Api.ExtensionMethods
         public static IServiceCollection AddCaching(this IServiceCollection services)
         {
             services.AddResponseCaching();
+            services.AddOutputCache(options =>
+            {
+                options.AddBasePolicy(policy =>
+                {
+                    policy.Expire(TimeSpan.FromSeconds(5)); // this policy doesn't affect OutputCache attribute
+                });
+
+                options.AddPolicy("ExpireIn30s", policy =>
+                {
+                    policy.Expire(TimeSpan.FromSeconds(30));
+                });
+            });
             return services;
         }
     }

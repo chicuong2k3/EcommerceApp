@@ -5,6 +5,7 @@ using EcommerceApp.Api.Dtos;
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace EcommerceApp.Api.Controllers.V1
 {
@@ -23,6 +24,9 @@ namespace EcommerceApp.Api.Controllers.V1
         }
 
         [HttpGet]
+        //[OutputCache(NoStore = true)]
+        // response will be cached until we change key
+        //[OutputCache(VaryByQueryKeys = new[] { nameof(key) }, Duration = 30)] 
         public async Task<IActionResult> GetAll()
         {
             var categories = await categoryRepository.GetCategoriesAsync();
@@ -33,6 +37,7 @@ namespace EcommerceApp.Api.Controllers.V1
         }
 
         [HttpGet("{id}")]
+
         public async Task<IActionResult> GetById(int id)
         {
             var category = await categoryRepository.GetByIdAsync(id);

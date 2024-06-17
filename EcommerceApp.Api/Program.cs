@@ -33,7 +33,7 @@ builder.Services.AddControllers(config =>
 
     // config.Filters.Add(); // add global action filters
 
-    config.CacheProfiles.Add("ExpireAfter300s", new CacheProfile()
+    config.CacheProfiles.Add("ExpireIn300s", new CacheProfile()
     {
         Duration = 300
     });
@@ -106,6 +106,7 @@ app.UseAuthorization();
 
 app.UseCors("CorsPolicy");
 app.UseResponseCaching();
+app.UseOutputCache();
 
 app.MapControllers();
 
