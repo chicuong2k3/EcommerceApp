@@ -13,6 +13,7 @@ namespace EcommerceApp.Api.Controllers.V1
 {
     [ApiController]
     [Route("/api/[controller]")]
+    [ResponseCache(CacheProfileName = "ExpireAfter300s")]
     public class ProductsController : ControllerBase
     {
         private readonly IProductRepository productRepository;
@@ -30,6 +31,7 @@ namespace EcommerceApp.Api.Controllers.V1
 
         [HttpGet]
         [HttpHead]
+        [ResponseCache(Duration = 100)]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> GetAll([FromQuery] ProductQueryParameters queryParameters)
         {

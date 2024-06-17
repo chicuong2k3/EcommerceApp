@@ -29,10 +29,14 @@ builder.Services.AddControllers(config =>
     config.RespectBrowserAcceptHeader = true;
     config.ReturnHttpNotAcceptable = true; // return 406 status code if clients negotiate for media type the server does not support
 
-
     config.OutputFormatters.Add(new CsvOutputFormatter());
 
     // config.Filters.Add(); // add global action filters
+
+    config.CacheProfiles.Add("ExpireAfter300s", new CacheProfile()
+    {
+        Duration = 300
+    });
 })
     .AddNewtonsoftJson()
     .AddXmlDataContractSerializerFormatters()
@@ -69,6 +73,9 @@ builder.Host.UseSerilog((context, configuration) =>
 // Api Versioning
 builder.Services.AddApiVersioningConfiguration();
 
+// Caching
+builder.Services.AddCaching();
+
 var app = builder.Build();
 
 NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter(IServiceProvider serviceProvider)
@@ -96,7 +103,9 @@ if (app.Environment.IsDevelopment())
 app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 app.UseAuthorization();
+
 app.UseCors("CorsPolicy");
+app.UseResponseCaching();
 
 app.MapControllers();
 

@@ -35,5 +35,10 @@ namespace EcommerceApp.Api.ExtensionMethods
             return services;
         }
 
+        public static IServiceCollection AddCaching(this IServiceCollection services)
+        {
+            services.AddResponseCaching();
+            return services;
+        }
     }
 }
