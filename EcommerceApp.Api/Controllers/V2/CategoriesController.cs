@@ -72,7 +72,7 @@ namespace EcommerceApp.Api.Controllers.V2
             var updatedCategory = mapper.Map<Category>(categoryCreateUpdateDto);
             updatedCategory.Id = id;
 
-            var success = await categoryRepository.UpdateAsync(id, updatedCategory);
+            var success = await categoryRepository.UpdateAsync(updatedCategory);
 
             if (!success)
             {

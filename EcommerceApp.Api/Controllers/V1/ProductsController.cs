@@ -37,9 +37,10 @@ namespace EcommerceApp.Api.Controllers.V1
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> GetAll([FromQuery] ProductQueryParameters queryParameters)
         {
-            PagingData<Product> pagingData = await productRepository.GetProductsAsync(queryParameters); ;
+            PagingData<Product> pagingData = await productRepository.GetProductsAsync(queryParameters);
 
             var pagingDataDto = mapper.Map<PagingDataDto<ProductGetDto>>(pagingData);
+
 
             Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(pagingDataDto));
 
@@ -47,7 +48,7 @@ namespace EcommerceApp.Api.Controllers.V1
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var product = await productRepository.GetByIdAsync(id);
 
@@ -77,12 +78,12 @@ namespace EcommerceApp.Api.Controllers.V1
 
         [HttpPut("{id}")]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
-        public async Task<IActionResult> Update(int id, [FromBody] ProductCreateUpdateDto productCreateUpdateDto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] ProductCreateUpdateDto productCreateUpdateDto)
         {
             var updatedProduct = mapper.Map<Product>(productCreateUpdateDto);
             updatedProduct.Id = id;
 
-            var success = await productRepository.UpdateAsync(id, updatedProduct);
+            var success = await productRepository.UpdateAsync(updatedProduct);
 
             if (!success)
             {
@@ -93,7 +94,7 @@ namespace EcommerceApp.Api.Controllers.V1
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             var success = await productRepository.DeleteAsync(id);
 
@@ -106,7 +107,7 @@ namespace EcommerceApp.Api.Controllers.V1
         }
 
         [HttpGet("collection/({ids})")]
-        public async Task<IActionResult> GetProductCollection([ModelBinder(BinderType = typeof(ListModelBinder))] IEnumerable<int> ids)
+        public async Task<IActionResult> GetProductCollection([ModelBinder(BinderType = typeof(ListModelBinder))] IEnumerable<Guid> ids)
         {
             var products = await productRepository.GetProductsByIdsAsync(ids);
 
@@ -130,7 +131,7 @@ namespace EcommerceApp.Api.Controllers.V1
         }
 
         [HttpPatch("{id}")]
-        public async Task<IActionResult> PartiallyUpdate(int id, [FromBody] JsonPatchDocument<ProductCreateUpdateDto> patchDocument)
+        public async Task<IActionResult> PartiallyUpdate(Guid id, [FromBody] JsonPatchDocument<ProductCreateUpdateDto> patchDocument)
         {
             if (patchDocument == null)
             {
@@ -157,7 +158,7 @@ namespace EcommerceApp.Api.Controllers.V1
             var updatedProduct = mapper.Map<Product>(productCreateUpdateDto);
             updatedProduct.Id = id;
 
-            var success = await productRepository.UpdateAsync(id, updatedProduct);
+            var success = await productRepository.UpdateAsync(updatedProduct);
 
             if (!success)
             {

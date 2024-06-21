@@ -2,13 +2,10 @@
 
 namespace EcommerceApp.Domain.Models
 {
-    public class Category
+    public class OrderStatus
     {
-
         public int Id { get; set; }
         [MaxLength(50)]
         public required string Name { get; set; }
-        public int? ParentCategoryId { get; set; }
-        public Category? ParentCategory { get; set; }
     }
 }

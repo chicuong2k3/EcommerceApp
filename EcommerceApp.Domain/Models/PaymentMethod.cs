@@ -2,13 +2,10 @@
 
 namespace EcommerceApp.Domain.Models
 {
-    public class Category
+    public class PaymentMethod
     {
-
         public int Id { get; set; }
-        [MaxLength(50)]
+        [MaxLength(100)]
         public required string Name { get; set; }
-        public int? ParentCategoryId { get; set; }
-        public Category? ParentCategory { get; set; }
     }
 }

@@ -4,9 +4,8 @@ namespace EcommerceApp.Api.Dtos
 {
     public class CategoryCreateUpdateDto
     {
-        [Required]
-        [MinLength(3)]
         [MaxLength(50)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
+        public string? ParentCategoryId { get; set; }
     }
 }
