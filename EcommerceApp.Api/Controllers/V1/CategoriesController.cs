@@ -6,6 +6,7 @@ using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace EcommerceApp.Api.Controllers.V1
 {
@@ -27,6 +28,7 @@ namespace EcommerceApp.Api.Controllers.V1
         //[OutputCache(NoStore = true)]
         // response will be cached until we change key
         //[OutputCache(VaryByQueryKeys = new[] { nameof(key) }, Duration = 30)] 
+        [EnableRateLimiting("3RequestPer30SecondsRateLimit")]
         public async Task<IActionResult> GetAll()
         {
             var categories = await categoryRepository.GetCategoriesAsync();

@@ -76,6 +76,9 @@ builder.Services.AddApiVersioningConfiguration();
 // Caching
 builder.Services.AddCaching();
 
+// Rate Limiting
+builder.Services.AddRateLimiting();
+
 var app = builder.Build();
 
 NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter(IServiceProvider serviceProvider)
@@ -104,6 +107,8 @@ app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 
+
+app.UseRateLimiter();
 app.UseCors("CorsPolicy");
 app.UseResponseCaching();
 app.UseOutputCache();

@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using EcommerceApp.DAL.Repositories;
 using EcommerceApp.Domain.Interfaces;
+using System.Threading.RateLimiting;
 
 namespace EcommerceApp.Api.ExtensionMethods
 {
@@ -50,6 +51,59 @@ namespace EcommerceApp.Api.ExtensionMethods
                     policy.Expire(TimeSpan.FromSeconds(30));
                 });
             });
+            return services;
+        }
+
+        public static IServiceCollection AddRateLimiting(this IServiceCollection services)
+        {
+            services.AddRateLimiter(options =>
+            {
+                options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+                {
+                    return RateLimitPartition.GetFixedWindowLimiter("GlobalLimiter", partition =>
+                    {
+                        return new FixedWindowRateLimiterOptions()
+                        {
+                            AutoReplenishment = true,
+                            PermitLimit = 5,
+                            QueueLimit = 2,
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                            Window = TimeSpan.FromMinutes(1)
+                        };
+                    });
+                });
+
+                options.AddPolicy("3RequestPer30SecondsRateLimit", context =>
+                {
+                    return RateLimitPartition.GetFixedWindowLimiter("GlobalLimiter", partition =>
+                    {
+                        return new FixedWindowRateLimiterOptions()
+                        {
+                            AutoReplenishment = true,
+                            PermitLimit = 3,
+                            QueueLimit = 0,
+                            Window = TimeSpan.FromSeconds(30)
+                        };
+                    });
+                });
+
+                //options.RejectionStatusCode = 429;
+
+                options.OnRejected = async (context, token) =>
+                {
+                    context.HttpContext.Response.StatusCode = 429;
+
+                    if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+                    {
+                        await context.HttpContext.Response.WriteAsync($"Too many requests. Please try again after {retryAfter.TotalSeconds} seconds.", token);
+                    }
+                    else
+                    {
+                        await context.HttpContext.Response.WriteAsync($"Too many requests. Please try again later.", token);
+                    }
+                };
+            });
+
             return services;
         }
     }
