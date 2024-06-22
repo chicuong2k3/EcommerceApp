@@ -59,6 +59,17 @@ namespace EcommerceApp.Api.Controllers.V1
 
             var productGetDto = mapper.Map<ProductGetDto>(product);
 
+            var categories = await productRepository.GetCategoriesOfProduct(product.Id);
+            productGetDto.Categories = categories.Select(x => x.Name).ToList();
+
+            var colours = await productRepository.GetColoursOfProduct(product.Id);
+             
+            foreach (var colour in colours)
+            {
+                var pvListDto = mapper.Map<List<ProductVariationDto>>(await productRepository.GetOptionsForColor(product.Id, colour.Id));
+                productGetDto.OptionsForColour.Add(colour.Value, pvListDto);
+            }
+
             return Ok(productGetDto);
         }
 
@@ -69,7 +80,19 @@ namespace EcommerceApp.Api.Controllers.V1
 
             var product = mapper.Map<Product>(productCreateUpdateDto);
 
-            var addedProduct = await productRepository.InsertAsync(product);
+            var optionForColors = mapper.Map<Dictionary<int, List<ProductVariation>>>(productCreateUpdateDto.OptionsForColour);
+
+            var addedProduct = await productRepository.CreateAsync(
+                product, 
+                productCreateUpdateDto.ColourIds.ToList(), 
+                productCreateUpdateDto.CategoryIds.ToList(),
+                optionForColors
+                );
+
+            if (addedProduct == null)
+            {
+                return BadRequest();
+            }
 
             var productGetDto = mapper.Map<ProductGetDto>(addedProduct);
 
@@ -114,21 +137,21 @@ namespace EcommerceApp.Api.Controllers.V1
             return Ok(mapper.Map<List<ProductGetDto>>(products));
         }
 
-        [HttpPost("collection")]
-        [ServiceFilter(typeof(ValidationFilterAttribute))]
-        public async Task<IActionResult> CreateProductList(IEnumerable<ProductCreateUpdateDto> productCreateUpdateDtos)
-        {
+        //[HttpPost("collection")]
+        //[ServiceFilter(typeof(ValidationFilterAttribute))]
+        //public async Task<IActionResult> CreateProductList(IEnumerable<ProductCreateUpdateDto> productCreateUpdateDtos)
+        //{
 
-            var result = new List<ProductGetDto>();
-            var products = mapper.Map<IEnumerable<Product>>(productCreateUpdateDtos);
-            foreach (var product in products)
-            {
-                var addedProduct = await productRepository.InsertAsync(product);
-                result.Add(mapper.Map<ProductGetDto>(addedProduct));
-            }
+        //    var result = new List<ProductGetDto>();
+        //    var products = mapper.Map<IEnumerable<Product>>(productCreateUpdateDtos);
+        //    foreach (var product in products)
+        //    {
+        //        var addedProduct = await productRepository.CreateAsync(product);
+        //        result.Add(mapper.Map<ProductGetDto>(addedProduct));
+        //    }
 
-            return CreatedAtAction(nameof(GetProductCollection), new { ids = string.Join(",", products.Select(p => p.Id)) }, result);
-        }
+        //    return CreatedAtAction(nameof(GetProductCollection), new { ids = string.Join(",", products.Select(p => p.Id)) }, result);
+        //}
 
         [HttpPatch("{id}")]
         public async Task<IActionResult> PartiallyUpdate(Guid id, [FromBody] JsonPatchDocument<ProductCreateUpdateDto> patchDocument)

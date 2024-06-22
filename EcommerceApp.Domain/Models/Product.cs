@@ -14,10 +14,13 @@ namespace EcommerceApp.Domain.Models
         public string? Description { get; set; }
         
         [MaxLength(1024)]
-        public required string ThumbUrl { get; set; }
+        public string? ThumbUrl { get; set; }
         [Column(TypeName = "decimal(18,2)")]
         public decimal OriginalPrice { get; set; }
         [Column(TypeName = "decimal(18,2)")]
         public decimal SalePrice { get; set; }
+
+        public ICollection<ProductItem> ProductItems { get; set; }
+        public ICollection<ProductCategory> ProductCategories { get; set; }
     }
 }

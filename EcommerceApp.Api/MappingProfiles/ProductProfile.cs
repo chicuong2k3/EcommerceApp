@@ -13,6 +13,9 @@ namespace EcommerceApp.Api.MappingProfiles
             CreateMap<Product, ProductCreateUpdateDto>().ReverseMap();
 
             CreateMap<PagingData<Product>, PagingDataDto<ProductGetDto>>().ReverseMap();
+
+
+            CreateMap<ProductVariation, ProductVariationDto>().ReverseMap();
         }
     }
 }

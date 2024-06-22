@@ -14,10 +14,33 @@ namespace EcommerceApp.DAL.Repositories
             this.dbContext = dbContext;
         }
 
-        public async Task<Product> InsertAsync(Product product)
+        public async Task<Product?> CreateAsync(Product product, List<int> colorIds, List<int> categoryIds, Dictionary<int, List<ProductVariation>> optionsForColour)
         {
+            product.ProductItems = colorIds.Select(colorId =>
+            {
+                return new ProductItem() { ColourId = colorId };
+            }).ToList();
+
+            product.ProductCategories = categoryIds.Select(categoryId =>
+            {
+                return new ProductCategory() { CategoryId = categoryId };
+            }).ToList();
+
+            foreach (var colourId in optionsForColour.Keys)
+            {
+                var pi = product.ProductItems.Where(x => x.ColourId == colourId).FirstOrDefault();
+                if (pi != null)
+                {
+                    pi.ProductVariations = optionsForColour[colourId];
+                }
+            }
+
             dbContext.Products.Add(product);
-            await dbContext.SaveChangesAsync();
+
+            var writtenEntries = await dbContext.SaveChangesAsync();
+
+            if (writtenEntries <= 0) return null;
+
             return product;
         }
         public async Task<bool> DeleteAsync(Guid id)
@@ -117,6 +140,28 @@ namespace EcommerceApp.DAL.Repositories
             return products;
         }
 
-        
+        public async Task<List<Category>> GetCategoriesOfProduct(Guid productId)
+        {
+            return await dbContext.ProductCategories.Where(x => x.ProductId == productId)
+                .Join(dbContext.Categories, pc => pc.CategoryId, c => c.Id, (pc, c) => c)
+                .ToListAsync();
+                    
+        }
+
+        public async Task<List<Colour>> GetColoursOfProduct(Guid productId)
+        {
+            return await dbContext.ProductItems.Where(x => x.ProductId == productId)
+                .Join(dbContext.Colours, pi => pi.ColourId, c => c.Id, (pi, c) => c)
+                .ToListAsync();
+        }
+
+        public async Task<List<ProductVariation>> GetOptionsForColor(Guid productId, int colorId)
+        {
+            return await dbContext.ProductVariations.Join(
+                dbContext.ProductItems.Where(x => x.ProductId == productId),
+                pv => pv.ProductItemId,
+                pi => pi.Id,
+                (pv, pi) => pv).ToListAsync();
+        }
     }
 }

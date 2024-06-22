@@ -5,21 +5,27 @@ namespace EcommerceApp.Api.Dtos
 {
     public class ProductCreateUpdateDto
     {
-        [Required]
-        [MinLength(5)]
-        [MaxLength(50)]
-        public string Name { get; set; }
-
+        [MaxLength(255)]
+        public required string Name { get; set; }
+        [MaxLength(1000)]
         public string? Description { get; set; }
+        [MaxLength(1024)]
+        public string? ThumbUrl { get; set; }
 
         [Range(0.0, 1000000000.0)]
-        public decimal Price { get; set; }
+        public decimal OriginalPrice { get; set; }
 
         [Range(0.0, 1000000000.0)]
-        [LessThan(nameof(Price))]
+        [LessThan(nameof(OriginalPrice))]
         public decimal SalePrice { get; set; }
+        public IEnumerable<int> CategoryIds { get; set; }
+        public IEnumerable<int> ColourIds { get; set; }
+        public Dictionary<int, List<ProductVariationCreateDto>> OptionsForColour { get; set; }
+    }
 
-        [Range(1, int.MaxValue)]
-        public int CategoryId { get; set; }
+    public class ProductVariationCreateDto
+    {
+        public int SizeId { get; set; }
+        public int QuantityInStock { get; set; }
     }
 }
