@@ -47,6 +47,10 @@ namespace EcommerceApp.Api.Controllers.V2
 
             var categoryGetDto = mapper.Map<CategoryGetDto>(category);
 
+            var parentCategory = await categoryRepository.GetParentCategoryOfAsync(category.Id);
+
+            categoryGetDto.ParentCategory = mapper.Map<ParentCategoryDto>(parentCategory);
+
             return Ok(categoryGetDto);
         }
 
@@ -61,6 +65,13 @@ namespace EcommerceApp.Api.Controllers.V2
 
             var categoryGetDto = mapper.Map<CategoryGetDto>(addedCategory);
 
+            var parentCategory = await categoryRepository.GetParentCategoryOfAsync(category.Id);
+
+            if (parentCategory != null)
+            {
+                categoryGetDto.ParentCategory = mapper.Map<ParentCategoryDto>(parentCategory);
+            }
+
             return CreatedAtAction(nameof(GetById), new { id = addedCategory.Id }, categoryGetDto);
         }
 
@@ -68,16 +79,17 @@ namespace EcommerceApp.Api.Controllers.V2
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> Update(int id, [FromBody] CategoryCreateUpdateDto categoryCreateUpdateDto)
         {
+            var category = await categoryRepository.GetByIdAsync(id);
+
+            if (category == null)
+            {
+                return NotFound($"Cannot find the category to update.");
+            }
 
             var updatedCategory = mapper.Map<Category>(categoryCreateUpdateDto);
             updatedCategory.Id = id;
 
-            var success = await categoryRepository.UpdateAsync(updatedCategory);
-
-            if (!success)
-            {
-                return NotFound($"Cannot find the category to update.");
-            }
+            await categoryRepository.UpdateAsync(updatedCategory);
 
             return Ok("Updated the category successfully.");
         }

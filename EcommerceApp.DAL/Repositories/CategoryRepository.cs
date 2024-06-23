@@ -20,11 +20,10 @@ namespace EcommerceApp.DAL.Repositories
             return category;
         }
 
-        public async Task<bool> UpdateAsync(Category category)
+        public async Task UpdateAsync(Category category)
         {
             dbContext.Categories.Update(category);
-            var writtenEntries = await dbContext.SaveChangesAsync();
-            return writtenEntries > 0;
+            await dbContext.SaveChangesAsync();
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -37,13 +36,15 @@ namespace EcommerceApp.DAL.Repositories
             }
 
             dbContext.Categories.Remove(category);
-            var writtenEntries = await dbContext.SaveChangesAsync();
-            return writtenEntries > 0;
+            await dbContext.SaveChangesAsync();
+            return true;
         }
 
         public async Task<Category?> GetByIdAsync(int id)
         {
-            return await dbContext.Categories.FindAsync(id);
+            var category = await dbContext.Categories.FindAsync(id);
+
+            return category;
         }
 
         public async Task<List<Category>> GetCategoriesAsync()
@@ -51,6 +52,21 @@ namespace EcommerceApp.DAL.Repositories
             return await dbContext.Categories.ToListAsync();
         }
 
-        
+        public async Task<Category?> GetParentCategoryOfAsync(int categoryId)
+        {
+            var category = await dbContext.Categories.FindAsync(categoryId);
+
+            if (category == null)
+            {
+                throw new ArgumentException("The category does not exist.");
+            }
+
+            if (category.ParentCategoryId == null)
+            {
+                return null;
+            }
+
+            return await dbContext.Categories.FindAsync(category.ParentCategoryId);
+        }
     }
 }
