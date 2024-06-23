@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EcommerceApp.Api.Dtos
 {
-    public class ProductCreateUpdateDto
+    public class ProductUpdateDto
     {
         [MaxLength(255)]
         public required string Name { get; set; }
@@ -18,14 +18,5 @@ namespace EcommerceApp.Api.Dtos
         [Range(0.0, 1000000000.0)]
         [LessThan(nameof(OriginalPrice))]
         public decimal SalePrice { get; set; }
-        public IEnumerable<int> CategoryIds { get; set; }
-        public IEnumerable<int> ColourIds { get; set; }
-        public Dictionary<int, List<ProductVariationCreateDto>> OptionsForColour { get; set; }
-    }
-
-    public class ProductVariationCreateDto
-    {
-        public int SizeId { get; set; }
-        public int QuantityInStock { get; set; }
     }
 }

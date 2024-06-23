@@ -34,16 +34,6 @@ namespace EcommerceApp.Api.Controllers.V1
 
             var data = mapper.Map<List<CategoryGetDto>>(categories);
 
-            foreach (var categoryGetDto in data)
-            {
-                var parentCategory = await categoryRepository.GetParentCategoryOfAsync(categoryGetDto.Id);
-
-                if (parentCategory != null)
-                {
-                    categoryGetDto.ParentCategory = mapper.Map<ParentCategoryDto>(parentCategory);
-                }
-            }
-
             return Ok(data);
         }
 
@@ -57,16 +47,8 @@ namespace EcommerceApp.Api.Controllers.V1
             {
                 return NotFound($"Cannot find the category.");
             }
-            
 
             var categoryGetDto = mapper.Map<CategoryGetDto>(category);
-            var parentCategory = await categoryRepository.GetParentCategoryOfAsync(category.Id);
-
-            if (parentCategory != null)
-            {
-                categoryGetDto.ParentCategory = mapper.Map<ParentCategoryDto>(parentCategory);
-            }
-
             return Ok(categoryGetDto);
         }
 
@@ -85,13 +67,6 @@ namespace EcommerceApp.Api.Controllers.V1
             }
 
             var categoryGetDto = mapper.Map<CategoryGetDto>(addedCategory);
-
-            var parentCategory = await categoryRepository.GetParentCategoryOfAsync(category.Id);
-
-            if (parentCategory != null)
-            {
-                categoryGetDto.ParentCategory = mapper.Map<ParentCategoryDto>(parentCategory);
-            }
 
             return CreatedAtAction(nameof(GetById), new { id = addedCategory.Id }, categoryGetDto);
         }

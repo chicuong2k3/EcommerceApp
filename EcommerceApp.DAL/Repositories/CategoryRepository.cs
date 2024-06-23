@@ -42,31 +42,18 @@ namespace EcommerceApp.DAL.Repositories
 
         public async Task<Category?> GetByIdAsync(int id)
         {
-            var category = await dbContext.Categories.FindAsync(id);
+            var category = await dbContext.Categories.AsNoTracking()
+                .Where(x => x.Id == id)
+                .FirstOrDefaultAsync();
 
             return category;
         }
 
         public async Task<List<Category>> GetCategoriesAsync()
         {
-            return await dbContext.Categories.ToListAsync();
+            return await dbContext.Categories.AsNoTracking().ToListAsync();
         }
 
-        public async Task<Category?> GetParentCategoryOfAsync(int categoryId)
-        {
-            var category = await dbContext.Categories.FindAsync(categoryId);
-
-            if (category == null)
-            {
-                throw new ArgumentException("The category does not exist.");
-            }
-
-            if (category.ParentCategoryId == null)
-            {
-                return null;
-            }
-
-            return await dbContext.Categories.FindAsync(category.ParentCategoryId);
-        }
+        
     }
 }

@@ -8,12 +8,12 @@
         public int TotalPages { get; set; }
 
         public List<T> Items { get; set; } = new List<T>();
-        public PagingData(List<T> items, int pageNumber, int pageSize)
+        public PagingData(List<T> items, int pageNumber, int pageSize, int totalItems)
         {
             CurrentPage = pageNumber;
             PageSize = pageSize;
-            TotalItems = items.Count;
-            TotalPages = (int)Math.Ceiling(items.Count / (double)pageSize);
+            TotalItems = totalItems;
+            TotalPages = (int)Math.Ceiling(TotalItems / (double)PageSize);
             Items.AddRange(items);
         }
     }

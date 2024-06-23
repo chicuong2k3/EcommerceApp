@@ -47,10 +47,6 @@ namespace EcommerceApp.Api.Controllers.V2
 
             var categoryGetDto = mapper.Map<CategoryGetDto>(category);
 
-            var parentCategory = await categoryRepository.GetParentCategoryOfAsync(category.Id);
-
-            categoryGetDto.ParentCategory = mapper.Map<ParentCategoryDto>(parentCategory);
-
             return Ok(categoryGetDto);
         }
 
@@ -64,13 +60,6 @@ namespace EcommerceApp.Api.Controllers.V2
             var addedCategory = await categoryRepository.InsertAsync(category);
 
             var categoryGetDto = mapper.Map<CategoryGetDto>(addedCategory);
-
-            var parentCategory = await categoryRepository.GetParentCategoryOfAsync(category.Id);
-
-            if (parentCategory != null)
-            {
-                categoryGetDto.ParentCategory = mapper.Map<ParentCategoryDto>(parentCategory);
-            }
 
             return CreatedAtAction(nameof(GetById), new { id = addedCategory.Id }, categoryGetDto);
         }

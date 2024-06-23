@@ -14,7 +14,7 @@ namespace EcommerceApp.DAL.Repositories
             this.dbContext = dbContext;
         }
 
-        public async Task<Product?> CreateAsync(Product product, List<int> colorIds, List<int> categoryIds, Dictionary<int, List<ProductVariation>> optionsForColour)
+        public async Task<Product?> CreateAsync(Product product, List<int> categoryIds, List<int> colorIds, Dictionary<int, List<ProductVariation>> optionsForColour)
         {
             product.ProductItems = colorIds.Select(colorId =>
             {
@@ -81,15 +81,16 @@ namespace EcommerceApp.DAL.Repositories
 
             IQueryable<ProductItem> productItemTable = dbContext.ProductItems;
 
-            if (queryParameters.ColourCode != null)
+            if (queryParameters.Colours != null && queryParameters.Colours.Count() > 0)
             {
-                productItemTable = productItemTable.Where(x => x.ColourId == queryParameters.ColourCode);
+                productItemTable = productItemTable.Where(x => queryParameters.Colours.Contains(x.ColourId));
             }
 
-            if (queryParameters.SizeCode != null)
+            if (queryParameters.Sizes != null && queryParameters.Sizes.Count() > 0)
             {
-                productItemTable = dbContext.ProductVariations.Where(x => x.SizeId == queryParameters.SizeCode)
-                    .Join(productItemTable, pv => pv.ProductItemId, pi => pi.Id, (pv, pi) => pi);
+                productItemTable = dbContext.ProductVariations.Where(x => queryParameters.Sizes.Contains(x.SizeId))
+                    .Join(productItemTable, pv => pv.ProductItemId, pi => pi.Id, (pv, pi) => pi)
+                    .Distinct();
             }
 
             if (queryParameters.CategoryId == null)
@@ -97,39 +98,35 @@ namespace EcommerceApp.DAL.Repositories
                 var productTable = dbContext.Products.Where(x => x.Name.ToLower().Contains(keyword)
                 && x.OriginalPrice >= queryParameters.MinPrice
                 && x.OriginalPrice <= queryParameters.MaxPrice);
-                
+     
+                products = productItemTable.Join(productTable, pi => pi.ProductId, p => p.Id, (pi, p) => p)
+                    .Distinct();
 
-                products = productItemTable.Join(productTable, pi => pi.ProductId, p => p.Id, (pi, p) => p);
-
-
-                products = products.Sort(queryParameters.OrderBy);
-
-                products = products.Skip((queryParameters.PageNumber - 1) * queryParameters.PageSize)
-                            .Take(queryParameters.PageSize);
-
-                
             }
             else
             {
                 var productTable = dbContext.ProductCategories.Where(x => x.CategoryId == queryParameters.CategoryId)
                     .Join(dbContext.Products.Where(x => x.Name.ToLower().Contains(keyword)
                 && x.OriginalPrice >= queryParameters.MinPrice
-                && x.OriginalPrice <= queryParameters.MaxPrice), pc => pc.ProductId, p => p.Id, (pc, p) => p);
+                && x.OriginalPrice <= queryParameters.MaxPrice), pc => pc.ProductId, p => p.Id, (pc, p) => p)
+                    .Distinct();
         
-                products = productItemTable.Join(productTable, pi => pi.ProductId, p => p.Id, (pi, p) => p);
-
-
-                products = products.Sort(queryParameters.OrderBy);
-
-                products = products.Skip((queryParameters.PageNumber - 1) * queryParameters.PageSize)
-                            .Take(queryParameters.PageSize);
-
- 
-                
+                products = productItemTable.Join(productTable, pi => pi.ProductId, p => p.Id, (pi, p) => p)
+                    .Distinct();
             }
 
+            var totalItems = await products.CountAsync();
 
-            return new PagingData<Product>(await products.ToListAsync(), queryParameters.PageNumber, queryParameters.PageSize);
+            products = products.Sort(queryParameters.OrderBy);
+
+            products = products.Skip((queryParameters.PageNumber - 1) * queryParameters.PageSize)
+                            .Take(queryParameters.PageSize);
+
+            return new PagingData<Product>(
+                await products.ToListAsync(), 
+                queryParameters.PageNumber, 
+                queryParameters.PageSize, 
+                totalItems);
         }
 
         public async Task<List<Product>> GetProductsByIdsAsync(IEnumerable<Guid> ids)

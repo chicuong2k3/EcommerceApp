@@ -9,6 +9,5 @@ namespace EcommerceApp.Domain.Interfaces
         Task<Category> InsertAsync(Category category);
         Task UpdateAsync(Category category);
         Task<bool> DeleteAsync(int id);
-        Task<Category?> GetParentCategoryOfAsync(int categoryId);
     }
 }

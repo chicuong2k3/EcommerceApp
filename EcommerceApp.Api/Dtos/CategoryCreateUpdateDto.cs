@@ -6,6 +6,5 @@ namespace EcommerceApp.Api.Dtos
     {
         [MaxLength(50)]
         public required string Name { get; set; }
-        public int? ParentCategoryId { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace EcommerceApp.Domain.Interfaces
 
         //Task<bool> RemoveFromCategoryAsync(int categoryId, int productId);
         Task<Product?> GetByIdAsync(Guid id);
-        Task<Product?> CreateAsync(Product product, List<int> colorIds, List<int> categoryIds, Dictionary<int, List<ProductVariation>> optionsForColour);
+        Task<Product?> CreateAsync(Product product, List<int> categoryIds, List<int> colorIds, Dictionary<int, List<ProductVariation>> optionsForColour);
         Task<bool> UpdateAsync(Product product);
         Task<bool> DeleteAsync(Guid id);
 

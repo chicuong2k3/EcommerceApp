@@ -11,7 +11,7 @@ namespace EcommerceApp.Domain.Shared
         public decimal MinPrice { get; set; } = 0;
         public decimal MaxPrice { get; set; } = int.MaxValue;
         public string? Keyword { get; set; }
-        public int? ColourCode { get; set; }
-        public int? SizeCode { get; set; }
+        public IEnumerable<int>? Colours { get; set; }
+        public IEnumerable<int>? Sizes { get; set; }
     }
 }

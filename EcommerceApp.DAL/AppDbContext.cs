@@ -11,21 +11,16 @@ namespace EcommerceApp.DAL
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Category>().HasOne(e => e.ParentCategory)
-                .WithMany(e => e.Categories)
-                .OnDelete(DeleteBehavior.NoAction);
-
             modelBuilder.Entity<Review>().HasOne(e => e.OrderLine)
                 .WithMany(e => e.Reviews)
                 .OnDelete(DeleteBehavior.NoAction);
 
             // Seeding data for Categories
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1, Name = "Đồ nữ" },
-                new Category { Id = 2, Name = "Đồ nam" },
-                new Category { Id = 3, Name = "Áo sơ mi nữ", ParentCategoryId = 1 },
-                new Category { Id = 4, Name = "Áo sơ mi nam", ParentCategoryId = 2 },
-                new Category { Id = 5, Name = "Áo sơ mi công sở", ParentCategoryId = 4 }
+                new Category { Id = 1, Name = "Đồ Nữ" },
+                new Category { Id = 2, Name = "Đồ Nam" },
+                new Category { Id = 3, Name = "Áo Thun"},
+                new Category { Id = 4, Name = "Áo Polo"}
             );
 
 
