@@ -1,9 +1,12 @@
 ﻿using EcommerceApp.Domain.Models;
+using EcommerceApp.Domain.Shared;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApp.DAL
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<AppUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -11,6 +14,31 @@ namespace EcommerceApp.DAL
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
+            // Identity Configuration
+            modelBuilder.Entity<AppUser>().ToTable("AppUsers");
+            modelBuilder.Entity<IdentityRole>().ToTable("Roles");
+            modelBuilder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");
+            modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims");
+            modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("UserClaims");
+            modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
+            modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogins");
+
+            modelBuilder.Entity<IdentityRole>().HasData(
+                new IdentityRole()
+                {
+                    Name = UserRoleConstant.Admin,
+                    NormalizedName = UserRoleConstant.NormalizedAdmin
+                },
+                new IdentityRole()
+                {
+                    Name = UserRoleConstant.Customer,
+                    NormalizedName = UserRoleConstant.NormalizedCustomer
+                }
+            );
+
+
             modelBuilder.Entity<Review>().HasOne(e => e.OrderLine)
                 .WithMany(e => e.Reviews)
                 .OnDelete(DeleteBehavior.NoAction);
@@ -683,7 +711,6 @@ namespace EcommerceApp.DAL
         }
 
         public DbSet<Product> Products { get; set; }
-        public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Cart> Carts { get; set; }

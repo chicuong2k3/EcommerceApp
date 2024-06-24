@@ -1,6 +1,16 @@
 ﻿using Asp.Versioning;
+using EcommerceApp.Api.Constants;
+using EcommerceApp.Api.Services.Implementations;
+using EcommerceApp.Api.Services.Interfaces;
+using EcommerceApp.Api.Settings;
+using EcommerceApp.DAL;
 using EcommerceApp.DAL.Repositories;
 using EcommerceApp.Domain.Interfaces;
+using EcommerceApp.Domain.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using System.Threading.RateLimiting;
 
 namespace EcommerceApp.Api.ExtensionMethods
@@ -75,7 +85,7 @@ namespace EcommerceApp.Api.ExtensionMethods
 
                 options.AddPolicy("3RequestPer30SecondsRateLimit", context =>
                 {
-                    return RateLimitPartition.GetFixedWindowLimiter("GlobalLimiter", partition =>
+                    return RateLimitPartition.GetFixedWindowLimiter("3RequestPer30SecondsRateLimit", partition =>
                     {
                         return new FixedWindowRateLimiterOptions()
                         {
@@ -83,6 +93,20 @@ namespace EcommerceApp.Api.ExtensionMethods
                             PermitLimit = 3,
                             QueueLimit = 0,
                             Window = TimeSpan.FromSeconds(30)
+                        };
+                    });
+                });
+
+                options.AddPolicy("AuthenticationRateLimit", context =>
+                {
+                    return RateLimitPartition.GetFixedWindowLimiter("AuthenticationRateLimit", partition =>
+                    {
+                        return new FixedWindowRateLimiterOptions()
+                        {
+                            AutoReplenishment = true,
+                            PermitLimit = 5,
+                            QueueLimit = 0,
+                            Window = TimeSpan.FromMinutes(10)
                         };
                     });
                 });
@@ -104,6 +128,63 @@ namespace EcommerceApp.Api.ExtensionMethods
                 };
             });
 
+            return services;
+        }
+    
+        public static IServiceCollection AddIdentity(this IServiceCollection services)
+        {
+            services.AddIdentity<AppUser, IdentityRole>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 8;
+                options.User.RequireUniqueEmail = true;
+
+            })
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+
+            return services;
+        }
+
+        public static IServiceCollection AddJWTAuthentication(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+
+            var jwtSettings = new JwtSettings();
+            configuration.Bind(JwtSettings.Section, jwtSettings);
+
+            var secretKey = Environment.GetEnvironmentVariable(EnviromentVariableConstant.SECRET);
+
+            if (string.IsNullOrEmpty(secretKey))
+            {
+                throw new ArgumentNullException($"{nameof(AddJWTAuthentication)} Secret Key does not exist.");
+            }
+
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings.Issuer,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+                };
+            });
+
+
+            services.AddTransient<IJwtService, JwtService>();
             return services;
         }
     }

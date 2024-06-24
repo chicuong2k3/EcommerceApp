@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using EcommerceApp.Api.CustomFilters;
 using Serilog;
 using EcommerceApp.Api.Formatters;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,9 +39,15 @@ builder.Services.AddControllers(config =>
         Duration = 300
     });
 })
-    .AddNewtonsoftJson()
-    .AddXmlDataContractSerializerFormatters()
-    .AddApplicationPart(typeof(Program).Assembly);
+.AddJsonOptions(options => {
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+})
+.AddNewtonsoftJson(options =>
+{
+    options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+})
+.AddXmlDataContractSerializerFormatters()
+.AddApplicationPart(typeof(Program).Assembly);
 
 // Add Filters
 builder.Services.AddScoped<ValidationFilterAttribute>();
@@ -79,6 +86,11 @@ builder.Services.AddCaching();
 // Rate Limiting
 builder.Services.AddRateLimiting();
 
+// Entity Framework Core Identity
+builder.Services.AddIdentity();
+// this must be placed after AddIdentity
+builder.Services.AddJWTAuthentication(builder.Configuration);
+
 var app = builder.Build();
 
 NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter(IServiceProvider serviceProvider)
@@ -104,9 +116,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseSerilogRequestLogging();
-app.UseHttpsRedirection();
-app.UseAuthorization();
 
+app.UseHttpsRedirection();
+
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseRateLimiter();
 app.UseCors("CorsPolicy");
@@ -114,5 +129,7 @@ app.UseResponseCaching();
 app.UseOutputCache();
 
 app.MapControllers();
+
+
 
 app.Run();

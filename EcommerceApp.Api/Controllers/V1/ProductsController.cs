@@ -5,6 +5,7 @@ using EcommerceApp.Api.ModelBinders;
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
 using EcommerceApp.Domain.Shared;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
@@ -92,6 +93,7 @@ namespace EcommerceApp.Api.Controllers.V1
         }
 
         [HttpPost]
+        [Authorize(Roles = UserRoleConstant.Admin)]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> Create([FromBody] ProductCreateDto productCreateDto)
         {
@@ -117,6 +119,7 @@ namespace EcommerceApp.Api.Controllers.V1
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = UserRoleConstant.Admin)]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> Update(Guid id, [FromBody] ProductUpdateDto productUpdateDto)
         {
@@ -134,6 +137,7 @@ namespace EcommerceApp.Api.Controllers.V1
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = UserRoleConstant.Admin)]
         public async Task<IActionResult> Delete(Guid id)
         {
             var success = await productRepository.DeleteAsync(id);
@@ -172,6 +176,7 @@ namespace EcommerceApp.Api.Controllers.V1
         //}
 
         [HttpPatch("{id}")]
+        [Authorize(Roles = UserRoleConstant.Admin)]
         public async Task<IActionResult> PartiallyUpdate(Guid id, [FromBody] JsonPatchDocument<ProductCreateDto> patchDocument)
         {
             if (patchDocument == null)

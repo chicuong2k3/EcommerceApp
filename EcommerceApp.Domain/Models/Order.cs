@@ -7,7 +7,7 @@ namespace EcommerceApp.Domain.Models
     {
         public Guid Id { get; set; }
         public Guid ShippingMethodId { get; set; }
-        public Guid AppUserId { get; set; }
+        public required string AppUserId { get; set; }
         public int AddressId { get; set; }
         [MaxLength(20)]
         public required string PhoneNumber { get; set; }
