@@ -2,6 +2,7 @@
 using EcommerceApp.Api.CustomFilters;
 using EcommerceApp.Api.Dtos;
 using EcommerceApp.Api.Services.Interfaces;
+using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
 using EcommerceApp.Domain.Shared;
 using Microsoft.AspNetCore.Identity;
@@ -19,16 +20,19 @@ namespace EcommerceApp.Api.Controllers.V1
         private readonly UserManager<AppUser> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly IJwtService jwtService;
+        private readonly ICartRepository cartRepository;
         private readonly IMapper mapper;
 
         public AuthController(UserManager<AppUser> userManager,
             RoleManager<IdentityRole> roleManager,
             IJwtService jwtService,
+            ICartRepository cartRepository,
             IMapper mapper)
         {
             this.userManager = userManager;
             this.roleManager = roleManager;
             this.jwtService = jwtService;
+            this.cartRepository = cartRepository;
             this.mapper = mapper;
         }
 
@@ -65,6 +69,7 @@ namespace EcommerceApp.Api.Controllers.V1
             }
 
             await userManager.AddToRoleAsync(user, "Customer");
+
             return Created();
         }
 

@@ -713,7 +713,6 @@ namespace EcommerceApp.DAL
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<Address> Addresses { get; set; }
-        public DbSet<Cart> Carts { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<PageVisit> PageVisits { get; set; }
         public DbSet<ShippingMethod> ShippingMethods { get; set; }

@@ -16,8 +16,11 @@ namespace EcommerceApp.Domain.Interfaces
 
         Task<List<Product>> GetProductsByIdsAsync(IEnumerable<Guid> ids);
 
-        Task<List<Category>> GetCategoriesOfProduct(Guid productId);   
-        Task<List<Colour>> GetColoursOfProduct(Guid productId);   
-        Task<List<ProductVariation>> GetOptionsForColor(Guid productId, int colorId);   
+        Task<List<Category>> GetCategoriesOfProductAsync(Guid productId);   
+        Task<List<Colour>> GetColoursOfProductAsync(Guid productId);   
+        Task<List<ProductVariation>> GetOptionsForColorAsync(Guid productId, int colorId); 
+        Task<ProductVariation?> GetProductVariationByIdAsync(Guid productVariationId); 
+        
+        Task<ProductItem?> GetProductItemByIdAsync(Guid productItemId);
     }
 }

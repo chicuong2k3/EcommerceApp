@@ -3,10 +3,10 @@
     public class CartItem
     {
         public Guid Id { get; set; }
-        public Guid ProductItemId { get; set; }
+        public Guid ProductVariationId { get; set; }
         public int Quantity { get; set; }
-        public Guid CartId { get; set; }
-        public ProductItem ProductItem { get; set; }
-        public Cart Cart { get; set; }
+        public string AppUserId { get; set; }
+        public ProductVariation ProductVariation { get; set; }
+        public AppUser AppUser { get; set; }
     }
 }

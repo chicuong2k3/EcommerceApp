@@ -65,7 +65,10 @@ namespace EcommerceApp.DAL.Repositories
         }
         public async Task<Product?> GetByIdAsync(Guid id)
         {
-            return await dbContext.Products.FindAsync(id);
+            return await dbContext.Products
+                .Where(x => x.Id == id)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
         }
 
         public async Task<PagingData<Product>> GetProductsAsync(ProductQueryParameters queryParameters)
@@ -123,7 +126,7 @@ namespace EcommerceApp.DAL.Repositories
                             .Take(queryParameters.PageSize);
 
             return new PagingData<Product>(
-                await products.ToListAsync(), 
+                await products.AsNoTracking().ToListAsync(), 
                 queryParameters.PageNumber, 
                 queryParameters.PageSize, 
                 totalItems);
@@ -137,28 +140,52 @@ namespace EcommerceApp.DAL.Repositories
             return products;
         }
 
-        public async Task<List<Category>> GetCategoriesOfProduct(Guid productId)
+        public async Task<List<Category>> GetCategoriesOfProductAsync(Guid productId)
         {
             return await dbContext.ProductCategories.Where(x => x.ProductId == productId)
                 .Join(dbContext.Categories, pc => pc.CategoryId, c => c.Id, (pc, c) => c)
+                .Distinct()
+                .AsNoTracking()
                 .ToListAsync();
                     
         }
 
-        public async Task<List<Colour>> GetColoursOfProduct(Guid productId)
+        public async Task<List<Colour>> GetColoursOfProductAsync(Guid productId)
         {
             return await dbContext.ProductItems.Where(x => x.ProductId == productId)
                 .Join(dbContext.Colours, pi => pi.ColourId, c => c.Id, (pi, c) => c)
+                .Distinct()
+                .AsNoTracking()
                 .ToListAsync();
         }
 
-        public async Task<List<ProductVariation>> GetOptionsForColor(Guid productId, int colorId)
+        public async Task<List<ProductVariation>> GetOptionsForColorAsync(Guid productId, int colorId)
         {
             return await dbContext.ProductVariations.Join(
                 dbContext.ProductItems.Where(x => x.ProductId == productId),
                 pv => pv.ProductItemId,
                 pi => pi.Id,
-                (pv, pi) => pv).ToListAsync();
+                (pv, pi) => pv)
+                .Include(x => x.Size)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        public async Task<ProductItem?> GetProductItemByIdAsync(Guid productItemId)
+        {
+            return await dbContext.ProductItems
+                .Include(x => x.Colour)
+                .Where(x => x.Id == productItemId)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<ProductVariation?> GetProductVariationByIdAsync(Guid productVariationId)
+        {
+            return await dbContext.ProductVariations
+                .Include(x => x.Size)
+                .Where(x => x.Id == productVariationId)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
         }
     }
 }

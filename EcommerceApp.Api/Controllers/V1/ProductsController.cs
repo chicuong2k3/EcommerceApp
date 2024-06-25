@@ -35,10 +35,10 @@ namespace EcommerceApp.Api.Controllers.V1
         {
             var productGetDto = mapper.Map<ProductGetDto>(product);
 
-            var categories = await productRepository.GetCategoriesOfProduct(product.Id);
+            var categories = await productRepository.GetCategoriesOfProductAsync(product.Id);
             productGetDto.Categories = mapper.Map<List<CategoryGetDto>>(categories);
 
-            var colours = await productRepository.GetColoursOfProduct(product.Id);
+            var colours = await productRepository.GetColoursOfProductAsync(product.Id);
             productGetDto.Colours = mapper.Map<List<ColourGetDto>>(colours);
 
             return productGetDto;
@@ -51,10 +51,10 @@ namespace EcommerceApp.Api.Controllers.V1
             foreach (var item in productGetDtos)
             {
 
-                var categories = await productRepository.GetCategoriesOfProduct(item.Id);
+                var categories = await productRepository.GetCategoriesOfProductAsync(item.Id);
                 item.Categories = mapper.Map<List<CategoryGetDto>>(categories);
 
-                var colours = await productRepository.GetColoursOfProduct(item.Id);
+                var colours = await productRepository.GetColoursOfProductAsync(item.Id);
                 item.Colours = mapper.Map<List<ColourGetDto>>(colours);
             }
 
@@ -93,7 +93,7 @@ namespace EcommerceApp.Api.Controllers.V1
         }
 
         [HttpPost]
-        [Authorize(Roles = UserRoleConstant.Admin)]
+        [Authorize(Roles = UserRoleConstant.Customer)]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> Create([FromBody] ProductCreateDto productCreateDto)
         {

@@ -66,7 +66,7 @@ namespace EcommerceApp.Api.Services.Implementations
                 issuer: jwtSettings.Issuer,
                 audience: jwtSettings.Audience,
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(Convert.ToDouble(jwtSettings.Expires)),
+                expires: DateTime.Now.AddMinutes(Convert.ToDouble(jwtSettings.ExpiresInMinutes)),
                 signingCredentials: credentials
             );
 
