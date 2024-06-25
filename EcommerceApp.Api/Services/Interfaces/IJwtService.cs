@@ -1,4 +1,4 @@
-﻿using EcommerceApp.Api.Dtos;
+﻿using EcommerceApp.Api.Dtos.AuthenticationDtos;
 using EcommerceApp.Domain.Models;
 
 namespace EcommerceApp.Api.Services.Interfaces

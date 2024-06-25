@@ -1,5 +1,5 @@
 ﻿using EcommerceApp.Api.Constants;
-using EcommerceApp.Api.Dtos;
+using EcommerceApp.Api.Dtos.AuthenticationDtos;
 using EcommerceApp.Api.Services.Interfaces;
 using EcommerceApp.Api.Settings;
 using EcommerceApp.Domain.Models;

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EcommerceApp.Api.Dtos
+namespace EcommerceApp.Api.Dtos.AuthenticationDtos
 {
     public class LoginDto
     {

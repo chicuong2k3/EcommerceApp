@@ -1,17 +1,22 @@
 ﻿using Asp.Versioning;
 using AutoMapper;
 using EcommerceApp.Api.CustomFilters;
-using EcommerceApp.Api.Dtos;
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using EcommerceApp.Domain.Shared;
+using EcommerceApp.Api.Dtos.CategoryDtos;
+using EcommerceApp.Api.Dtos.SharedDtos;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EcommerceApp.Api.Controllers.V1
 {
-    [ApiVersion("1.0", Deprecated = true)]
+    //[ApiVersion("1.0", Deprecated = false)]
     [ApiController]
     [Route("/api/[controller]")]
+    [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [Authorize(Roles = UserRoleConstant.Admin)]
     public class CategoriesController : ControllerBase
     {
         private readonly ICategoryRepository categoryRepository;
@@ -28,18 +33,19 @@ namespace EcommerceApp.Api.Controllers.V1
         // response will be cached until we change key
         //[OutputCache(VaryByQueryKeys = new[] { nameof(key) }, Duration = 30)] 
         [EnableRateLimiting("3RequestPer30SecondsRateLimit")]
-        public async Task<IActionResult> GetAll()
+        [AllowAnonymous]
+        public async Task<IActionResult> GetCategories([FromQuery] CategoryQueryParameters queryParameters)
         {
-            var categories = await categoryRepository.GetCategoriesAsync();
+            var data = await categoryRepository.GetCategoriesAsync(queryParameters);
 
-            var data = mapper.Map<List<CategoryGetDto>>(categories);
+            var dataDto = mapper.Map<PagedDataDto<CategoryGetDto>>(data);
 
-            return Ok(data);
+            return Ok(new { data = dataDto.Items, pagination = dataDto.Pagination });
         }
 
         [HttpGet("{id}")]
-
-        public async Task<IActionResult> GetById(int id)
+        [AllowAnonymous]
+        public async Task<IActionResult> GetCategoryById(int id)
         {
             var category = await categoryRepository.GetByIdAsync(id);
 
@@ -54,10 +60,11 @@ namespace EcommerceApp.Api.Controllers.V1
 
         [HttpPost]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
-        public async Task<IActionResult> Create([FromBody] CategoryCreateUpdateDto categoryCreateUpdateDto)
+        public async Task<IActionResult> CreateCategory([FromBody] CategoryCreateUpdateDto categoryCreateUpdateDto)
         {
-
+           
             var category = mapper.Map<Category>(categoryCreateUpdateDto);
+            category.Slug = category.Name.GenerateSlug();
 
             var addedCategory = await categoryRepository.InsertAsync(category);
 
@@ -68,12 +75,12 @@ namespace EcommerceApp.Api.Controllers.V1
 
             var categoryGetDto = mapper.Map<CategoryGetDto>(addedCategory);
 
-            return CreatedAtAction(nameof(GetById), new { id = addedCategory.Id }, categoryGetDto);
+            return CreatedAtAction(nameof(GetCategoryById), new { id = addedCategory.Id }, categoryGetDto);
         }
 
         [HttpPut("{id}")]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
-        public async Task<IActionResult> Update(int id, [FromBody] CategoryCreateUpdateDto categoryCreateUpdateDto)
+        public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryCreateUpdateDto categoryCreateUpdateDto)
         {
             var category = await categoryRepository.GetByIdAsync(id);
 
@@ -91,7 +98,7 @@ namespace EcommerceApp.Api.Controllers.V1
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteCategory(int id)
         {
             var success = await categoryRepository.DeleteAsync(id);
 

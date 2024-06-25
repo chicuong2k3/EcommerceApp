@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using EcommerceApp.Api.CustomFilters;
-using EcommerceApp.Api.Dtos;
+using EcommerceApp.Api.Dtos.CategoryDtos;
+using EcommerceApp.Api.Dtos.ProductDtos;
+using EcommerceApp.Api.Dtos.SharedDtos;
 using EcommerceApp.Api.ModelBinders;
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
@@ -15,6 +17,8 @@ namespace EcommerceApp.Api.Controllers.V1
 {
     [ApiController]
     [Route("/api/[controller]")]
+    [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [Authorize(Roles = UserRoleConstant.Admin)]
     //[ResponseCache(CacheProfileName = "ExpireIn300s")]
     public class ProductsController : ControllerBase
     {
@@ -65,22 +69,23 @@ namespace EcommerceApp.Api.Controllers.V1
         [HttpHead]
         //[ResponseCache(Duration = 100)]
         [OutputCache(Duration = 100)]
-        [ServiceFilter(typeof(ValidationFilterAttribute))]
-        public async Task<IActionResult> GetAll([FromQuery] ProductQueryParameters queryParameters)
+        [AllowAnonymous]
+        public async Task<IActionResult> GetProducts([FromQuery] ProductQueryParameters queryParameters)
         {
-            PagingData<Product> pagingData = await productRepository.GetProductsAsync(queryParameters);
+            PagedData<Product> data = await productRepository.GetProductsAsync(queryParameters);
 
-            var pagingDataDto = mapper.Map<PagingDataDto<ProductGetDto>>(pagingData);
+            var dataDto = mapper.Map<PagedDataDto<ProductGetDto>>(data);
 
-            pagingDataDto.Items = await BuildProductGetDtoList(pagingData.Items);
+            dataDto.Items = await BuildProductGetDtoList(data.Items);
 
-            Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(pagingDataDto));
+            Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(data));
 
-            return Ok(pagingDataDto);
+            return Ok(new { data = dataDto.Items, pagination = dataDto.Pagination });
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        [AllowAnonymous]
+        public async Task<IActionResult> GetProductById(Guid id)
         {
             var product = await productRepository.GetByIdAsync(id);
 
@@ -93,14 +98,12 @@ namespace EcommerceApp.Api.Controllers.V1
         }
 
         [HttpPost]
-        [Authorize(Roles = UserRoleConstant.Customer)]
-        [ServiceFilter(typeof(ValidationFilterAttribute))]
-        public async Task<IActionResult> Create([FromBody] ProductCreateDto productCreateDto)
+        public async Task<IActionResult> CreateProduct([FromBody] ProductCreateDto productCreateDto)
         {
 
             var product = mapper.Map<Product>(productCreateDto);
 
-            var optionForColors = mapper.Map<Dictionary<int, List<ProductVariation>>>(productCreateDto.OptionsForColour);
+            var optionForColors = mapper.Map<Dictionary<int, List<ProductVariant>>>(productCreateDto.OptionsForColour);
 
             var addedProduct = await productRepository.CreateAsync(
                 product,
@@ -115,13 +118,11 @@ namespace EcommerceApp.Api.Controllers.V1
             }
 
             
-            return CreatedAtAction(nameof(GetById), new { id = addedProduct.Id }, await BuildProductGetDto(addedProduct));
+            return CreatedAtAction(nameof(GetProductById), new { id = addedProduct.Id }, await BuildProductGetDto(addedProduct));
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = UserRoleConstant.Admin)]
-        [ServiceFilter(typeof(ValidationFilterAttribute))]
-        public async Task<IActionResult> Update(Guid id, [FromBody] ProductUpdateDto productUpdateDto)
+        public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] ProductUpdateDto productUpdateDto)
         {
             var updatedProduct = mapper.Map<Product>(productUpdateDto);
             updatedProduct.Id = id;
@@ -137,8 +138,7 @@ namespace EcommerceApp.Api.Controllers.V1
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = UserRoleConstant.Admin)]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> DeleteProduct(Guid id)
         {
             var success = await productRepository.DeleteAsync(id);
 
@@ -160,7 +160,6 @@ namespace EcommerceApp.Api.Controllers.V1
         }
 
         //[HttpPost("collection")]
-        //[ServiceFilter(typeof(ValidationFilterAttribute))]
         //public async Task<IActionResult> CreateProductList(IEnumerable<ProductCreateUpdateDto> productCreateUpdateDtos)
         //{
 
@@ -176,8 +175,7 @@ namespace EcommerceApp.Api.Controllers.V1
         //}
 
         [HttpPatch("{id}")]
-        [Authorize(Roles = UserRoleConstant.Admin)]
-        public async Task<IActionResult> PartiallyUpdate(Guid id, [FromBody] JsonPatchDocument<ProductCreateDto> patchDocument)
+        public async Task<IActionResult> PartiallyUpdateProduct(Guid id, [FromBody] JsonPatchDocument<ProductCreateDto> patchDocument)
         {
             if (patchDocument == null)
             {

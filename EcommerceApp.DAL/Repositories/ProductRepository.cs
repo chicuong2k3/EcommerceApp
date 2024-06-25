@@ -14,7 +14,7 @@ namespace EcommerceApp.DAL.Repositories
             this.dbContext = dbContext;
         }
 
-        public async Task<Product?> CreateAsync(Product product, List<int> categoryIds, List<int> colorIds, Dictionary<int, List<ProductVariation>> optionsForColour)
+        public async Task<Product?> CreateAsync(Product product, List<int> categoryIds, List<int> colorIds, Dictionary<int, List<ProductVariant>> optionsForColour)
         {
             product.ProductItems = colorIds.Select(colorId =>
             {
@@ -31,7 +31,7 @@ namespace EcommerceApp.DAL.Repositories
                 var pi = product.ProductItems.Where(x => x.ColourId == colourId).FirstOrDefault();
                 if (pi != null)
                 {
-                    pi.ProductVariations = optionsForColour[colourId];
+                    pi.ProductVariants = optionsForColour[colourId];
                 }
             }
 
@@ -66,12 +66,12 @@ namespace EcommerceApp.DAL.Repositories
         public async Task<Product?> GetByIdAsync(Guid id)
         {
             return await dbContext.Products
-                .Where(x => x.Id == id)
                 .AsNoTracking()
+                .Where(x => x.Id == id)
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<PagingData<Product>> GetProductsAsync(ProductQueryParameters queryParameters)
+        public async Task<PagedData<Product>> GetProductsAsync(ProductQueryParameters queryParameters)
         {
             string keyword = string.Empty;
 
@@ -87,54 +87,67 @@ namespace EcommerceApp.DAL.Repositories
             if (queryParameters.Colours != null && queryParameters.Colours.Count() > 0)
             {
                 productItemTable = productItemTable.Where(x => queryParameters.Colours.Contains(x.ColourId));
+                    
             }
 
             if (queryParameters.Sizes != null && queryParameters.Sizes.Count() > 0)
             {
-                productItemTable = dbContext.ProductVariations.Where(x => queryParameters.Sizes.Contains(x.SizeId))
+                productItemTable = dbContext.ProductVariants
+                    .Where(x => queryParameters.Sizes.Contains(x.SizeId))
+                    .Select(x => new { x.ProductItemId })
                     .Join(productItemTable, pv => pv.ProductItemId, pi => pi.Id, (pv, pi) => pi)
                     .Distinct();
             }
 
             if (queryParameters.CategoryId == null)
             {
-                var productTable = dbContext.Products.Where(x => x.Name.ToLower().Contains(keyword)
+                var productTable = dbContext.Products
+                    .Where(x => x.Name.ToLower().Contains(keyword)
                 && x.OriginalPrice >= queryParameters.MinPrice
                 && x.OriginalPrice <= queryParameters.MaxPrice);
      
-                products = productItemTable.Join(productTable, pi => pi.ProductId, p => p.Id, (pi, p) => p)
+                products = productItemTable.Select(x => new { x.ProductId })
+                    .Join(productTable, pi => pi.ProductId, p => p.Id, (pi, p) => p)
                     .Distinct();
 
             }
             else
             {
-                var productTable = dbContext.ProductCategories.Where(x => x.CategoryId == queryParameters.CategoryId)
+                var productTable = dbContext.ProductCategories
+                    .Where(x => x.CategoryId == queryParameters.CategoryId)
+                    .Select(x => new { x.ProductId })
                     .Join(dbContext.Products.Where(x => x.Name.ToLower().Contains(keyword)
                 && x.OriginalPrice >= queryParameters.MinPrice
-                && x.OriginalPrice <= queryParameters.MaxPrice), pc => pc.ProductId, p => p.Id, (pc, p) => p)
+                && x.OriginalPrice <= queryParameters.MaxPrice)
+                    , pc => pc.ProductId, p => p.Id, (pc, p) => p)
                     .Distinct();
-        
-                products = productItemTable.Join(productTable, pi => pi.ProductId, p => p.Id, (pi, p) => p)
+
+                products = productItemTable.Select(x => new { x.ProductId })
+                    .Join(productTable, pi => pi.ProductId, p => p.Id, (pi, p) => p)
                     .Distinct();
             }
 
             var totalItems = await products.CountAsync();
 
-            products = products.Sort(queryParameters.OrderBy);
+            
 
-            products = products.Skip((queryParameters.PageNumber - 1) * queryParameters.PageSize)
-                            .Take(queryParameters.PageSize);
+            var start = (queryParameters.Page - 1) * queryParameters.Limit;
+            //var end = queryParameters.PageNumber * queryParameters.PageSize;
+            products = products.Skip(start).Take(queryParameters.Limit);
 
-            return new PagingData<Product>(
+            products = products.Sort(queryParameters.SortBy);
+
+            return new PagedData<Product>(
                 await products.AsNoTracking().ToListAsync(), 
-                queryParameters.PageNumber, 
-                queryParameters.PageSize, 
+                queryParameters.Page, 
+                queryParameters.Limit, 
                 totalItems);
         }
 
         public async Task<List<Product>> GetProductsByIdsAsync(IEnumerable<Guid> ids)
         {
             var products = await dbContext.Products
+                .AsNoTracking()
                 .Where(x => ids.Contains(x.Id))
                 .ToListAsync();
             return products;
@@ -142,49 +155,54 @@ namespace EcommerceApp.DAL.Repositories
 
         public async Task<List<Category>> GetCategoriesOfProductAsync(Guid productId)
         {
-            return await dbContext.ProductCategories.Where(x => x.ProductId == productId)
-                .Join(dbContext.Categories, pc => pc.CategoryId, c => c.Id, (pc, c) => c)
-                .Distinct()
+            return await dbContext.ProductCategories
                 .AsNoTracking()
+                .Where(x => x.ProductId == productId)
+                .Join(dbContext.Categories.AsNoTracking(), pc => pc.CategoryId, c => c.Id, (pc, c) => c)
+                .Distinct()
                 .ToListAsync();
                     
         }
 
         public async Task<List<Colour>> GetColoursOfProductAsync(Guid productId)
         {
-            return await dbContext.ProductItems.Where(x => x.ProductId == productId)
-                .Join(dbContext.Colours, pi => pi.ColourId, c => c.Id, (pi, c) => c)
-                .Distinct()
+            return await dbContext.ProductItems
                 .AsNoTracking()
+                .Where(x => x.ProductId == productId)
+                .Join(dbContext.Colours.AsNoTracking(), pi => pi.ColourId, c => c.Id, (pi, c) => c)
+                .Distinct()
                 .ToListAsync();
         }
 
-        public async Task<List<ProductVariation>> GetOptionsForColorAsync(Guid productId, int colorId)
+        public async Task<List<ProductVariant>> GetOptionsForColorAsync(Guid productId, int colorId)
         {
-            return await dbContext.ProductVariations.Join(
-                dbContext.ProductItems.Where(x => x.ProductId == productId),
+            return await dbContext.ProductVariants
+                .AsNoTracking()
+                .Join(
+                dbContext.ProductItems.AsNoTracking().Where(x => x.ProductId == productId),
                 pv => pv.ProductItemId,
                 pi => pi.Id,
                 (pv, pi) => pv)
                 .Include(x => x.Size)
-                .AsNoTracking()
+                .Distinct()
                 .ToListAsync();
         }
 
         public async Task<ProductItem?> GetProductItemByIdAsync(Guid productItemId)
         {
             return await dbContext.ProductItems
+                .AsNoTracking()
                 .Include(x => x.Colour)
                 .Where(x => x.Id == productItemId)
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<ProductVariation?> GetProductVariationByIdAsync(Guid productVariationId)
+        public async Task<ProductVariant?> GetProductVariantByIdAsync(Guid productVariantId)
         {
-            return await dbContext.ProductVariations
-                .Include(x => x.Size)
-                .Where(x => x.Id == productVariationId)
+            return await dbContext.ProductVariants
                 .AsNoTracking()
+                .Include(x => x.Size)
+                .Where(x => x.Id == productVariantId)
                 .FirstOrDefaultAsync();
         }
     }

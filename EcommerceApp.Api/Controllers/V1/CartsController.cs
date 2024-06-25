@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using EcommerceApp.Api.Dtos;
+using EcommerceApp.Api.Dtos.CartDtos;
 using EcommerceApp.Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +31,7 @@ namespace EcommerceApp.Api.Controllers.V1
 
             foreach (var cartLine in cartLines)
             {
-                var productItem = await productRepository.GetProductItemByIdAsync(cartLine.ProductVariation.ProductItemId);
+                var productItem = await productRepository.GetProductItemByIdAsync(cartLine.ProductVariant.ProductItemId);
 
                 if (productItem == null)
                 {
@@ -45,9 +45,9 @@ namespace EcommerceApp.Api.Controllers.V1
                 cartLineDto.Product = mapper.Map<ProductCartDto>(product);
                 cartLineDto.Product.Colour = productItem.Colour.Value;
 
-                var productVariation = await productRepository.GetProductVariationByIdAsync(cartLine.ProductVariationId);
-                if (productVariation != null)
-                    cartLineDto.Product.Size = productVariation.Size.Value;
+                var productVariant = await productRepository.GetProductVariantByIdAsync(cartLine.ProductVariantId);
+                if (productVariant != null)
+                    cartLineDto.Product.Size = productVariant.Size.Value;
 
                 result.Add(cartLineDto);
             }
@@ -60,16 +60,16 @@ namespace EcommerceApp.Api.Controllers.V1
         {
             await cartRepository.AddProductsAsync(
                 addProductToCartDto.AppUserId,
-                addProductToCartDto.ProductVariationId,
+                addProductToCartDto.ProductVariantId,
                 addProductToCartDto.Quantity);
 
             return Ok("Added product to cart successfully.");
         }
 
         [HttpDelete("{appUserId}/{productVariationId}")]
-        public async Task<IActionResult> RemoveProductFromCart(string appUserId, Guid productVariationId)
+        public async Task<IActionResult> RemoveProductFromCart(string appUserId, Guid productVariantId)
         {
-            await cartRepository.RemoveProductAsync(appUserId, productVariationId);
+            await cartRepository.RemoveProductAsync(appUserId, productVariantId);
 
             return Ok("Removed product from cart successfully.");
         }

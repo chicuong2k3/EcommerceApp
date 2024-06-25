@@ -1,4 +1,4 @@
-﻿namespace EcommerceApp.Api.Dtos
+﻿namespace EcommerceApp.Api.Dtos.CartDtos
 {
     public class ProductCartDto
     {

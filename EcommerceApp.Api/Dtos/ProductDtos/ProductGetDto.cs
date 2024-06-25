@@ -1,5 +1,6 @@
-﻿
-namespace EcommerceApp.Api.Dtos
+﻿using EcommerceApp.Api.Dtos.CategoryDtos;
+
+namespace EcommerceApp.Api.Dtos.ProductDtos
 {
     public class ProductGetDto
     {

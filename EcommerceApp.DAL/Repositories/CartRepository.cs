@@ -13,20 +13,20 @@ namespace EcommerceApp.DAL.Repositories
         {
             this.dbContext = dbContext;
         }
-        public async Task AddProductsAsync(string appUserId, Guid productVariationId, int quantity)
+        public async Task AddProductsAsync(string appUserId, Guid productVariantId, int quantity)
         {
-            var productVariation = await dbContext.ProductVariations.FindAsync(productVariationId);
-            if (productVariation == null) throw new NotFoundException("The product variation does not exist.");
+            var productVariant = await dbContext.ProductVariants.FindAsync(productVariantId);
+            if (productVariant == null) throw new NotFoundException("The product variation does not exist.");
 
             var existingCartItem = dbContext.CartItems
-                .Where(x => x.AppUserId == appUserId && x.ProductVariationId == productVariationId)
+                .Where(x => x.AppUserId == appUserId && x.ProductVariantId == productVariantId)
                 .FirstOrDefault();
 
             if (existingCartItem == null)
             {
                 var cartItem = new CartItem()
                 {
-                    ProductVariationId = productVariationId,
+                    ProductVariantId = productVariantId,
                     AppUserId = appUserId,
                     Quantity = quantity
                 };
@@ -44,16 +44,18 @@ namespace EcommerceApp.DAL.Repositories
 
         public async Task<List<CartItem>> GetCartLinesAsync(string appUserId)
         {
-            return await dbContext.CartItems.Include(x => x.ProductVariation)
+            return await dbContext.CartItems
+                .AsNoTracking()
+                .Include(x => x.ProductVariant)
                 .Where(x => x.AppUserId == appUserId)
                 .ToListAsync();
 
         }
 
-        public async Task RemoveProductAsync(string appUserId, Guid productVariationId)
+        public async Task RemoveProductAsync(string appUserId, Guid productVariantId)
         {
             var existingCartItem = dbContext.CartItems
-                .Where(x => x.AppUserId == appUserId && x.ProductVariationId == productVariationId)
+                .Where(x => x.AppUserId == appUserId && x.ProductVariantId == productVariantId)
                 .FirstOrDefault();
 
             if (existingCartItem == null)

@@ -1,4 +1,4 @@
-﻿using EcommerceApp.Api.Dtos;
+﻿using EcommerceApp.Api.Dtos.CategoryDtos;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Net.Http.Headers;
 using System.Text;

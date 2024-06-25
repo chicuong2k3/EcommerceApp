@@ -1,7 +1,7 @@
 ﻿using EcommerceApp.Domain.CusomAttributes;
 using System.ComponentModel.DataAnnotations;
 
-namespace EcommerceApp.Api.Dtos
+namespace EcommerceApp.Api.Dtos.ProductDtos
 {
     public class ProductCreateDto
     {

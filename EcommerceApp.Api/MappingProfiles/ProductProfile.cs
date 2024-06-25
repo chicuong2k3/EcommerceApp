@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using EcommerceApp.Api.Dtos;
+using EcommerceApp.Api.Dtos.ProductDtos;
 using EcommerceApp.Domain.Models;
 using EcommerceApp.Domain.Shared;
 
@@ -13,10 +13,7 @@ namespace EcommerceApp.Api.MappingProfiles
             CreateMap<Product, ProductCreateDto>().ReverseMap();
             CreateMap<Product, ProductUpdateDto>().ReverseMap();
 
-            CreateMap<PagingData<Product>, PagingDataDto<ProductGetDto>>().ReverseMap();
-
-
-            CreateMap<ProductVariation, ProductVariationDto>().ReverseMap();
+            CreateMap<ProductVariant, ProductVariationDto>().ReverseMap();
         }
     }
 }

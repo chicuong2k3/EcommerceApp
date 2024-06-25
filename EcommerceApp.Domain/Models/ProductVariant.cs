@@ -1,6 +1,6 @@
 ﻿namespace EcommerceApp.Domain.Models
 {
-    public class ProductVariation
+    public class ProductVariant
     {
         public Guid Id { get; set; }
         public Guid ProductItemId { get; set; }

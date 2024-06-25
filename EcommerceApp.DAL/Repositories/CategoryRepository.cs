@@ -1,5 +1,6 @@
 ﻿using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
+using EcommerceApp.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApp.DAL.Repositories
@@ -22,6 +23,7 @@ namespace EcommerceApp.DAL.Repositories
 
         public async Task UpdateAsync(Category category)
         {
+            category.Slug = category.Name.GenerateSlug();
             dbContext.Categories.Update(category);
             await dbContext.SaveChangesAsync();
         }
@@ -49,9 +51,27 @@ namespace EcommerceApp.DAL.Repositories
             return category;
         }
 
-        public async Task<List<Category>> GetCategoriesAsync()
+        public async Task<PagedData<Category>> GetCategoriesAsync(CategoryQueryParameters queryParameters)
         {
-            return await dbContext.Categories.AsNoTracking().ToListAsync();
+            var categories = dbContext.Categories.AsNoTracking();
+            if (!string.IsNullOrEmpty(queryParameters.Keyword))
+            {
+                var keyword = queryParameters.Keyword.ToLower();
+                categories = categories.Where(x => x.Name.ToLower().Contains(keyword));
+            }
+
+            var totalItems = await categories.CountAsync();
+
+            var start = (queryParameters.Page - 1) * queryParameters.Limit;
+            categories = categories.Skip(start).Take(queryParameters.Limit);
+
+            categories = categories.Sort(queryParameters.SortBy);
+
+            return new PagedData<Category>(
+                await categories.AsNoTracking().ToListAsync(),
+                queryParameters.Page,
+                queryParameters.Limit,
+                totalItems);
         }
 
         

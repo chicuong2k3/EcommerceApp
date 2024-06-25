@@ -1,4 +1,4 @@
-﻿namespace EcommerceApp.Api.Dtos
+﻿namespace EcommerceApp.Api.Dtos.ProductDtos
 {
     public class ProductVariationDto
     {

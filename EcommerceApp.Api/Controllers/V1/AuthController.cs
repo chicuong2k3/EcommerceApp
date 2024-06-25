@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using EcommerceApp.Api.CustomFilters;
-using EcommerceApp.Api.Dtos;
+using EcommerceApp.Api.Dtos.AuthenticationDtos;
 using EcommerceApp.Api.Services.Interfaces;
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;

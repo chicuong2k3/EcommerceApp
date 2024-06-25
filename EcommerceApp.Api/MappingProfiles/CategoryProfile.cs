@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using EcommerceApp.Api.Dtos;
+using EcommerceApp.Api.Dtos.CategoryDtos;
 using EcommerceApp.Domain.Models;
 
 namespace EcommerceApp.Api.MappingProfiles

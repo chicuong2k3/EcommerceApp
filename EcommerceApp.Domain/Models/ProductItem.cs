@@ -7,6 +7,6 @@
         public int ColourId { get; set; }
         public Product Product { get; set; }
         public Colour Colour { get; set; }
-        public ICollection<ProductVariation> ProductVariations { get; set; }
+        public ICollection<ProductVariant> ProductVariants { get; set; }
     }
 }
