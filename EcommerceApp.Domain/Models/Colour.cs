@@ -7,5 +7,6 @@ namespace EcommerceApp.Domain.Models
         public int Id { get; set; }
         [MaxLength(50)]
         public required string Value { get; set; }
+        public ICollection<ProductVariant> ProductVariant { get; set; } = new List<ProductVariant>();
     }
 }

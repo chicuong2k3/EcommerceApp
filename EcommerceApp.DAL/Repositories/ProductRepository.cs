@@ -1,4 +1,5 @@
-﻿using EcommerceApp.Domain.Interfaces;
+﻿using EcommerceApp.Domain.Exceptions;
+using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
 using EcommerceApp.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -14,54 +15,51 @@ namespace EcommerceApp.DAL.Repositories
             this.dbContext = dbContext;
         }
 
-        public async Task<Product?> CreateAsync(Product product, List<int> categoryIds, List<int> colorIds, Dictionary<int, List<ProductVariant>> optionsForColour)
+        public async Task<Product?> InsertAsync(Product product, List<int> categoryIds)
         {
-            product.ProductItems = colorIds.Select(colorId =>
+            try
             {
-                return new ProductItem() { ColourId = colorId };
-            }).ToList();
-
-            product.ProductCategories = categoryIds.Select(categoryId =>
-            {
-                return new ProductCategory() { CategoryId = categoryId };
-            }).ToList();
-
-            foreach (var colourId in optionsForColour.Keys)
-            {
-                var pi = product.ProductItems.Where(x => x.ColourId == colourId).FirstOrDefault();
-                if (pi != null)
+                product.ProductCategories = categoryIds.Select(categoryId =>
                 {
-                    pi.ProductVariants = optionsForColour[colourId];
-                }
+                    return new ProductCategory() { CategoryId = categoryId };
+                }).ToList();
+
+                dbContext.Products.Add(product);
+
+                await dbContext.SaveChangesAsync();
+
+                return product;
+            }
+            catch (Exception)
+            {
+                return null;
             }
 
-            dbContext.Products.Add(product);
-
-            var writtenEntries = await dbContext.SaveChangesAsync();
-
-            if (writtenEntries <= 0) return null;
-
-            return product;
         }
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id)
         {
             var product = await dbContext.Products.FindAsync(id);
 
             if (product == null)
             {
-                return false;
+                throw new NotFoundException("Cannot find the product to delete.");
             }
 
             dbContext.Products.Remove(product);
-            var writtenEntries = await dbContext.SaveChangesAsync();
-            return writtenEntries > 0;
+            await dbContext.SaveChangesAsync();
         }
 
-        public async Task<bool> UpdateAsync(Product product)
+        public async Task UpdateAsync(Product product)
         {
+            var exist = dbContext.Products.Any(x => x.Id == product.Id);
+
+            if (!exist)
+            {
+                throw new NotFoundException("Cannot find the product to update.");
+            }
+
             dbContext.Products.Update(product);
-            var writtenEntries = await dbContext.SaveChangesAsync();
-            return writtenEntries > 0;
+            await dbContext.SaveChangesAsync();
         }
         public async Task<Product?> GetByIdAsync(Guid id)
         {
@@ -82,21 +80,16 @@ namespace EcommerceApp.DAL.Repositories
 
             IQueryable<Product> products;
 
-            IQueryable<ProductItem> productItemTable = dbContext.ProductItems;
+            IQueryable<ProductVariant> productVariantTable = dbContext.ProductVariants;
 
             if (queryParameters.Colours != null && queryParameters.Colours.Count() > 0)
             {
-                productItemTable = productItemTable.Where(x => queryParameters.Colours.Contains(x.ColourId));
-                    
+                productVariantTable = productVariantTable.Where(x => queryParameters.Colours.Contains(x.ColourId));
             }
 
             if (queryParameters.Sizes != null && queryParameters.Sizes.Count() > 0)
             {
-                productItemTable = dbContext.ProductVariants
-                    .Where(x => queryParameters.Sizes.Contains(x.SizeId))
-                    .Select(x => new { x.ProductItemId })
-                    .Join(productItemTable, pv => pv.ProductItemId, pi => pi.Id, (pv, pi) => pi)
-                    .Distinct();
+                productVariantTable = productVariantTable.Where(x => queryParameters.Sizes.Contains(x.SizeId));
             }
 
             if (queryParameters.CategoryId == null)
@@ -106,8 +99,8 @@ namespace EcommerceApp.DAL.Repositories
                 && x.OriginalPrice >= queryParameters.MinPrice
                 && x.OriginalPrice <= queryParameters.MaxPrice);
      
-                products = productItemTable.Select(x => new { x.ProductId })
-                    .Join(productTable, pi => pi.ProductId, p => p.Id, (pi, p) => p)
+                products = productVariantTable.Select(x => new { x.ProductId })
+                    .Join(productTable, pv => pv.ProductId, p => p.Id, (pv, p) => p)
                     .Distinct();
 
             }
@@ -122,8 +115,8 @@ namespace EcommerceApp.DAL.Repositories
                     , pc => pc.ProductId, p => p.Id, (pc, p) => p)
                     .Distinct();
 
-                products = productItemTable.Select(x => new { x.ProductId })
-                    .Join(productTable, pi => pi.ProductId, p => p.Id, (pi, p) => p)
+                products = productVariantTable.Select(x => new { x.ProductId })
+                    .Join(productTable, pv => pv.ProductId, p => p.Id, (pv, p) => p)
                     .Distinct();
             }
 
@@ -158,6 +151,7 @@ namespace EcommerceApp.DAL.Repositories
             return await dbContext.ProductCategories
                 .AsNoTracking()
                 .Where(x => x.ProductId == productId)
+                .Select(x => new { x.CategoryId })
                 .Join(dbContext.Categories.AsNoTracking(), pc => pc.CategoryId, c => c.Id, (pc, c) => c)
                 .Distinct()
                 .ToListAsync();
@@ -166,44 +160,67 @@ namespace EcommerceApp.DAL.Repositories
 
         public async Task<List<Colour>> GetColoursOfProductAsync(Guid productId)
         {
-            return await dbContext.ProductItems
+            return await dbContext.ProductVariants
                 .AsNoTracking()
                 .Where(x => x.ProductId == productId)
-                .Join(dbContext.Colours.AsNoTracking(), pi => pi.ColourId, c => c.Id, (pi, c) => c)
+                .Select(x => new { x.ColourId })
+                .Join(dbContext.Colours.AsNoTracking(), pv => pv.ColourId, c => c.Id, (pv, c) => c)
                 .Distinct()
                 .ToListAsync();
         }
 
-        public async Task<List<ProductVariant>> GetOptionsForColorAsync(Guid productId, int colorId)
+        public async Task<List<ProductVariant>> GetProductVariantsAsync(Guid productId)
         {
             return await dbContext.ProductVariants
                 .AsNoTracking()
-                .Join(
-                dbContext.ProductItems.AsNoTracking().Where(x => x.ProductId == productId),
-                pv => pv.ProductItemId,
-                pi => pi.Id,
-                (pv, pi) => pv)
+                .Where (x => x.ProductId == productId)
                 .Include(x => x.Size)
-                .Distinct()
                 .ToListAsync();
         }
 
-        public async Task<ProductItem?> GetProductItemByIdAsync(Guid productItemId)
+        public async Task<ProductVariant?> GetProductVariantAsync(Guid productId, int variantNumber)
         {
-            return await dbContext.ProductItems
+            return await dbContext.ProductVariants
                 .AsNoTracking()
                 .Include(x => x.Colour)
-                .Where(x => x.Id == productItemId)
+                .Where(x => x.ProductId == productId && x.VariantNumber == variantNumber)
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<ProductVariant?> GetProductVariantByIdAsync(Guid productVariantId)
+        public async Task<ProductVariant?> AddVariantForProductAsync(Guid productId, ProductVariant productVariant)
         {
+            var product = await dbContext.Products.FindAsync(productId);
+
+            if (product == null)
+            {
+                throw new NotFoundException("Cannot add a product variant as the product is not found.");
+            }
+
+            try
+            {
+                dbContext.ProductVariants.Add(productVariant);
+                await dbContext.SaveChangesAsync();
+                return productVariant;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public async Task<List<ProductVariant>> GetProductsVariantAsync(Guid productId)
+        {
+            var product = await dbContext.Products.FindAsync(productId);
+
+            if (product == null)
+            {
+                throw new NotFoundException("Cannot add a product variant as the product is not found.");
+            }
+
             return await dbContext.ProductVariants
                 .AsNoTracking()
-                .Include(x => x.Size)
-                .Where(x => x.Id == productVariantId)
-                .FirstOrDefaultAsync();
+                .Where(x => x.ProductId == productId)
+                .ToListAsync();
         }
     }
 }

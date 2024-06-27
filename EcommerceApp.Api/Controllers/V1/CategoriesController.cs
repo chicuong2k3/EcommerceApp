@@ -9,6 +9,7 @@ using EcommerceApp.Domain.Shared;
 using EcommerceApp.Api.Dtos.CategoryDtos;
 using EcommerceApp.Api.Dtos.SharedDtos;
 using Microsoft.AspNetCore.Authorization;
+using EcommerceApp.Domain.Constants;
 
 namespace EcommerceApp.Api.Controllers.V1
 {
@@ -34,7 +35,7 @@ namespace EcommerceApp.Api.Controllers.V1
         //[OutputCache(VaryByQueryKeys = new[] { nameof(key) }, Duration = 30)] 
         [EnableRateLimiting("3RequestPer30SecondsRateLimit")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetCategories([FromQuery] CategoryQueryParameters queryParameters)
+        public async Task<IActionResult> ListCategories([FromQuery] CategoryQueryParameters queryParameters)
         {
             var data = await categoryRepository.GetCategoriesAsync(queryParameters);
 
@@ -82,13 +83,6 @@ namespace EcommerceApp.Api.Controllers.V1
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryCreateUpdateDto categoryCreateUpdateDto)
         {
-            var category = await categoryRepository.GetByIdAsync(id);
-
-            if (category == null)
-            {
-                return NotFound($"Cannot find the category to update.");
-            }
-
             var updatedCategory = mapper.Map<Category>(categoryCreateUpdateDto);
             updatedCategory.Id = id;
 
@@ -100,12 +94,7 @@ namespace EcommerceApp.Api.Controllers.V1
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
-            var success = await categoryRepository.DeleteAsync(id);
-
-            if (!success)
-            {
-                return NotFound($"Cannot find the category to delete.");
-            }
+            await categoryRepository.DeleteAsync(id);
 
             return NoContent();
         }

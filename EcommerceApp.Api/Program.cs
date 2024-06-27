@@ -53,6 +53,7 @@ builder.Services.AddControllers(config =>
 // Add Filters
 builder.Services.AddScoped<ValidationFilterAttribute>();
 builder.Services.AddScoped<ValidateMediaTypeAttribute>();
+builder.Services.AddScoped<ValidateCartOwnerFilterAttribute>();
 
 
 builder.Services.AddHttpContextAccessor();
@@ -132,5 +133,5 @@ app.UseOutputCache();
 app.MapControllers();
 
 
-
+app.MigrateDatabase();
 app.Run();

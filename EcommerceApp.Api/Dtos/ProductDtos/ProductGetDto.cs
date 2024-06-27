@@ -10,8 +10,8 @@ namespace EcommerceApp.Api.Dtos.ProductDtos
         public string ThumbUrl { get; init; } = string.Empty;
         public decimal OriginalPrice { get; set; }
         public decimal SalePrice { get; set; }
-        public List<CategoryGetDto> Categories { get; set; }
-        public List<ColourGetDto> Colours { get; set; }
+        public List<CategoryGetDto>? Categories { get; set; }
+        public List<ColourGetDto>? Colours { get; set; }
 
     }
 

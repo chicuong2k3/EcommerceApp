@@ -10,7 +10,6 @@ namespace EcommerceApp.Api.CustomFilters
         {
             
         }
-
         public void OnActionExecuting(ActionExecutingContext context)
         {
             var hasAcceptHeader = context.HttpContext.Request.Headers.ContainsKey("Accept");

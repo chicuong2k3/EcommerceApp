@@ -1,8 +1,11 @@
-﻿namespace EcommerceApp.Domain.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace EcommerceApp.Domain.Models
 {
     public class ShippingMethod
     {
-        public Guid Id { get; set; }
-        public string ShippingProvider { get; set; }
+        public int Id { get; set; }
+        [MaxLength(100)]
+        public required string ShippingProvider { get; set; }
     }
 }

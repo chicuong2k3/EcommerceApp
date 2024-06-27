@@ -5,12 +5,10 @@ namespace EcommerceApp.Domain.Interfaces
 {
     public interface IProductRepository
     {
-
-        //Task<bool> RemoveFromCategoryAsync(int categoryId, int productId);
         Task<Product?> GetByIdAsync(Guid id);
-        Task<Product?> CreateAsync(Product product, List<int> categoryIds, List<int> colorIds, Dictionary<int, List<ProductVariant>> optionsForColour);
-        Task<bool> UpdateAsync(Product product);
-        Task<bool> DeleteAsync(Guid id);
+        Task<Product?> InsertAsync(Product product, List<int> categoryIds);
+        Task UpdateAsync(Product product);
+        Task DeleteAsync(Guid id);
 
         Task<PagedData<Product>> GetProductsAsync(ProductQueryParameters queryParameters);
 
@@ -18,9 +16,9 @@ namespace EcommerceApp.Domain.Interfaces
 
         Task<List<Category>> GetCategoriesOfProductAsync(Guid productId);   
         Task<List<Colour>> GetColoursOfProductAsync(Guid productId);   
-        Task<List<ProductVariant>> GetOptionsForColorAsync(Guid productId, int colorId); 
-        Task<ProductVariant?> GetProductVariantByIdAsync(Guid productVariantId); 
-        
-        Task<ProductItem?> GetProductItemByIdAsync(Guid productItemId);
+        Task<List<ProductVariant>> GetProductVariantsAsync(Guid productId); 
+        Task<ProductVariant?> GetProductVariantAsync(Guid productId, int variantNumber); 
+        Task<ProductVariant?> AddVariantForProductAsync(Guid productId, ProductVariant productVariant);
+        Task<List<ProductVariant>> GetProductsVariantAsync(Guid productId);
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace EcommerceApp.Domain.Shared
+﻿namespace EcommerceApp.Domain.Constants
 {
     public static class UserRoleConstant
     {

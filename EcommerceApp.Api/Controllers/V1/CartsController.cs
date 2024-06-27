@@ -1,77 +1,112 @@
 ﻿using AutoMapper;
+using EcommerceApp.Api.CustomFilters;
 using EcommerceApp.Api.Dtos.CartDtos;
+using EcommerceApp.Api.Dtos.SharedDtos;
+using EcommerceApp.Domain.Constants;
 using EcommerceApp.Domain.Interfaces;
+using EcommerceApp.Domain.Models;
+using EcommerceApp.Domain.Shared;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace EcommerceApp.Api.Controllers.V1
 {
     [ApiController]
     [Route("/api/[controller]")]
+    [Authorize(Roles = UserRoleConstant.Customer)]
+    [ServiceFilter(typeof(ValidateCartOwnerFilterAttribute))]
     public class CartsController : Controller
     {
         private readonly ICartRepository cartRepository;
         private readonly IProductRepository productRepository;
+        private readonly UserManager<AppUser> userManager;
         private readonly IMapper mapper;
 
         public CartsController(
             ICartRepository cartRepository,
             IProductRepository productRepository,
+            UserManager<AppUser> userManager,
             IMapper mapper)
         {
             this.cartRepository = cartRepository;
             this.productRepository = productRepository;
+            this.userManager = userManager;
             this.mapper = mapper;
         }
-        [HttpGet("{appUserId}")]
-        public async Task<IActionResult> GetAllCartLines(string appUserId)
+
+        [HttpGet]
+        public async Task<IActionResult> GetCart()
         {
-            var cartLines = await cartRepository.GetCartLinesAsync(appUserId);
-            var result = new List<CartLineDto>();
+            var user = await userManager.FindByNameAsync(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
 
-            foreach (var cartLine in cartLines)
+            if (user == null)
             {
-                var productItem = await productRepository.GetProductItemByIdAsync(cartLine.ProductVariant.ProductItemId);
-
-                if (productItem == null)
-                {
-                    return BadRequest();
-                }
-
-                var product = await productRepository.GetByIdAsync(productItem.ProductId);
-                
-                var cartLineDto = mapper.Map<CartLineDto>(cartLine);
-
-                cartLineDto.Product = mapper.Map<ProductCartDto>(product);
-                cartLineDto.Product.Colour = productItem.Colour.Value;
-
-                var productVariant = await productRepository.GetProductVariantByIdAsync(cartLine.ProductVariantId);
-                if (productVariant != null)
-                    cartLineDto.Product.Size = productVariant.Size.Value;
-
-                result.Add(cartLineDto);
+                return Unauthorized();
             }
 
-            return Ok(result);
+            var cart = await cartRepository.GetCartByOwnerIdAsync(user.Id);
+
+            if (cart == null) return NotFound();
+
+            return Ok(cart);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddProductToCart([FromBody] AddProductToCartDto addProductToCartDto)
+        [HttpGet("{cartId}/items")]
+        public async Task<IActionResult> GetCartItems(Guid cartId, [FromQuery] CartItemQueryParameters queryParameters)
         {
-            await cartRepository.AddProductsAsync(
-                addProductToCartDto.AppUserId,
-                addProductToCartDto.ProductVariantId,
+            var cartItems = await cartRepository.GetCartItemsAsync(cartId, queryParameters);
+            var result = mapper.Map<PagedDataDto<CartItemGetDto>>(cartItems);
+
+            return Ok(new { data = result.Items, pagination = result.Pagination });
+        }
+
+        [HttpGet("{cartId}/items/{cartItemId}")]
+        public async Task<IActionResult> GetCartItemById(Guid cartId, Guid cartItemId)
+        {
+            var cartItem = await cartRepository.GetCartItemByIdAsync(cartItemId);
+
+            if (cartItem == null) return NotFound("The cart item is not found.");
+
+            return Ok(mapper.Map<CartItemGetDto>(cartItem));
+        }
+
+        [HttpPost("{cartId}/items")]
+        public async Task<IActionResult> AddProductToCart(Guid cartId, [FromBody] AddProductToCartDto addProductToCartDto)
+        {
+            
+            var cartItem = await cartRepository.AddProductsAsync(
+                cartId,
+                addProductToCartDto.ProductId,
+                addProductToCartDto.ProductVariantNumber,
                 addProductToCartDto.Quantity);
 
-            return Ok("Added product to cart successfully.");
+            if (cartItem == null)
+            {
+                return StatusCode(500);
+            }
+
+            var cartItemDto = mapper.Map<CartItemGetDto>(cartItem);
+
+            return CreatedAtAction(nameof(GetCartItemById), new { cartId = cartItem.CartId, cartItemId = cartItem.Id}, cartItemDto);
         }
 
-        [HttpDelete("{appUserId}/{productVariationId}")]
-        public async Task<IActionResult> RemoveProductFromCart(string appUserId, Guid productVariantId)
+        [HttpDelete("{cartId}/items/{cartItemId}")]
+        public async Task<IActionResult> RemoveProductFromCart(Guid cartId, Guid cartItemId, [FromBody] int quantity)
         {
-            await cartRepository.RemoveProductAsync(appUserId, productVariantId);
+
+            await cartRepository.RemoveProductAsync(cartItemId, quantity);
 
             return Ok("Removed product from cart successfully.");
+        }
+
+        [HttpDelete("{cartId}/items")]
+        public async Task<IActionResult> ClearCart(Guid cartId)
+        {
+            await cartRepository.ClearCartAsync(cartId);
+
+            return Ok("Cleared the cart successfully.");
         }
     }
 }

@@ -7,8 +7,8 @@ namespace EcommerceApp.Domain.Interfaces
     {
         Task<PagedData<Category>> GetCategoriesAsync(CategoryQueryParameters queryParameters);
         Task<Category?> GetByIdAsync(int id);
-        Task<Category> InsertAsync(Category category);
+        Task<Category?> InsertAsync(Category category);
         Task UpdateAsync(Category category);
-        Task<bool> DeleteAsync(int id);
+        Task DeleteAsync(int id);
     }
 }

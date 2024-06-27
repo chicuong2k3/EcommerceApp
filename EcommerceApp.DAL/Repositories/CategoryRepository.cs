@@ -1,4 +1,5 @@
-﻿using EcommerceApp.Domain.Interfaces;
+﻿using EcommerceApp.Domain.Exceptions;
+using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
 using EcommerceApp.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -14,32 +15,46 @@ namespace EcommerceApp.DAL.Repositories
             this.dbContext = dbContext;
         }
 
-        public async Task<Category> InsertAsync(Category category)
+        public async Task<Category?> InsertAsync(Category category)
         {
-            dbContext.Categories.Add(category);
-            await dbContext.SaveChangesAsync();
-            return category;
+            try
+            {
+                dbContext.Categories.Add(category);
+                await dbContext.SaveChangesAsync();
+                return category;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         public async Task UpdateAsync(Category category)
         {
+            var exist = dbContext.Categories.Any(x => x.Id == category.Id);
+
+            if (!exist)
+            {
+                throw new NotFoundException("Cannot find the category to update.");
+            }
+
             category.Slug = category.Name.GenerateSlug();
             dbContext.Categories.Update(category);
             await dbContext.SaveChangesAsync();
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
         {
             var category = await dbContext.Categories.FindAsync(id);
 
             if (category == null)
             {
-                return false;
+                throw new NotFoundException("Cannot find the category to delete.");
             }
 
             dbContext.Categories.Remove(category);
             await dbContext.SaveChangesAsync();
-            return true;
+
         }
 
         public async Task<Category?> GetByIdAsync(int id)

@@ -6,6 +6,7 @@ namespace EcommerceApp.Api.Dtos.ProductDtos
     public class ProductCreateDto
     {
         [MaxLength(255)]
+        [MinLength(10)]
         public required string Name { get; set; }
         [MaxLength(1000)]
         public string? Description { get; set; }
@@ -18,9 +19,7 @@ namespace EcommerceApp.Api.Dtos.ProductDtos
         [Range(0.0, 1000000000.0)]
         [LessThan(nameof(OriginalPrice))]
         public decimal SalePrice { get; set; }
-        public IEnumerable<int> CategoryIds { get; set; }
-        public IEnumerable<int> ColourIds { get; set; }
-        public Dictionary<int, List<ProductVariationDto>> OptionsForColour { get; set; }
+        public required IEnumerable<int> CategoryIds { get; set; }
     }
 
 }

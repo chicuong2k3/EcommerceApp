@@ -1,8 +1,9 @@
-﻿using EcommerceApp.Domain.Models;
-using EcommerceApp.Domain.Shared;
+﻿using EcommerceApp.Domain.Constants;
+using EcommerceApp.Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace EcommerceApp.DAL
 {
@@ -10,7 +11,10 @@ namespace EcommerceApp.DAL
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
+            
         }
+        
+ 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -25,16 +29,90 @@ namespace EcommerceApp.DAL
             modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
             modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogins");
 
+            modelBuilder.Entity<ProductVariant>()
+                .HasKey(e => new { e.ProductId, e.VariantNumber });
+            modelBuilder.Entity<ProductVariant>()
+                .HasOne(e => e.Product).WithMany(e => e.ProductVariants);
+            modelBuilder.Entity<ProductVariant>()
+                .HasMany(e => e.CartItems).WithOne(e => e.ProductVariant);
+            modelBuilder.Entity<ProductVariant>()
+                .HasMany(e => e.ProductImages).WithOne(e => e.ProductVariant);
+
+            // Seed data for Roles
+            var adminRole = new IdentityRole()
+            {
+                Id = "7d9c829f-f420-4bcd-879d-247eb817adab",
+                Name = UserRoleConstant.Admin,
+                NormalizedName = UserRoleConstant.NormalizedAdmin
+            };
+            var customerRole = new IdentityRole()
+            {
+                Id = "9908864b-a330-49ab-a8bd-b2bac67263ff",
+                Name = UserRoleConstant.Customer,
+                NormalizedName = UserRoleConstant.NormalizedCustomer
+            };
+           
+
             modelBuilder.Entity<IdentityRole>().HasData(
-                new IdentityRole()
+                adminRole,
+                customerRole
+            );
+
+            // Seed data for AppUsers
+
+            var passwordHasher = new PasswordHasher<AppUser>();
+
+            var admin = new AppUser()
+            {
+                Id = "aa2d56cd-d0dc-452d-916f-3d52977e6a8a",
+                FirstName = "Minh",
+                LastName = "Dương Văn",
+                UserName = "admin12345",
+                NormalizedUserName = "ADMIN12345",
+                Email = "admin12345@gmail.com",
+                NormalizedEmail = "ADMIN12345@GMAIL.COM",
+                RegistrationDate = DateTime.Now
+            };
+
+            admin.PasswordHash = passwordHasher.HashPassword(admin, "admin12345");
+
+            var customer = new AppUser()
+            {
+                Id = "bed414f3-12ee-4121-83db-60e8ebaa9d40",
+                FirstName = "Hùng",
+                LastName = "Trần Quốc",
+                UserName = "customer123",
+                NormalizedUserName = "CUSTOMER123",
+                Email = "customer123@gmail.com",
+                NormalizedEmail = "CUSTOMER123@GMAIL.COM",
+                RegistrationDate = DateTime.Now
+            };
+
+            customer.PasswordHash = passwordHasher.HashPassword(customer, "customer123");
+
+            modelBuilder.Entity<AppUser>().HasData(
+                admin,
+                customer
+            );
+
+            var cart = new Cart()
+            {
+                Id = Guid.NewGuid(),
+                AppUserId = customer.Id
+            };
+
+            modelBuilder.Entity<Cart>().HasData(cart);
+
+            modelBuilder.Entity<IdentityUserRole<string>>().HasData(
+                new IdentityUserRole<string>()
                 {
-                    Name = UserRoleConstant.Admin,
-                    NormalizedName = UserRoleConstant.NormalizedAdmin
+                    UserId = admin.Id,
+                    RoleId = adminRole.Id
                 },
-                new IdentityRole()
+                new IdentityUserRole<string>()
                 {
-                    Name = UserRoleConstant.Customer,
-                    NormalizedName = UserRoleConstant.NormalizedCustomer
+                    UserId = customer.Id,
+                    RoleId = customerRole.Id
                 }
             );
 
@@ -234,479 +312,25 @@ namespace EcommerceApp.DAL
                 new Size { Id = 6, Value = "XXL" }
             );
 
-            // Seeding data for ProductItems
-            var productItem1 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product1.Id,
-                ColourId = 1
-            };
-
-            var productItem2 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product1.Id,
-                ColourId = 2
-            };
-
-            var productItem3 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product1.Id,
-                ColourId = 3
-            };
-
-            var productItem4 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product1.Id,
-                ColourId = 4
-            };
-
-            var productItem5 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product2.Id,
-                ColourId = 1
-            };
-
-            var productItem6 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product2.Id,
-                ColourId = 2
-            };
-
-            var productItem7 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product2.Id,
-                ColourId = 3
-            };
-
-            var productItem8 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product2.Id,
-                ColourId = 4
-            };
-
-            var productItem9 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product2.Id,
-                ColourId = 5
-            };
-
-            var productItem10 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product2.Id,
-                ColourId = 6
-            };
-
-            var productItem11 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product3.Id,
-                ColourId = 1
-            };
-
-            var productItem12 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product1.Id,
-                ColourId = 2
-            };
-
-            var productItem13 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product3.Id,
-                ColourId = 3
-            };
-
-            var productItem14 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product4.Id,
-                ColourId = 1
-            };
-
-            var productItem15 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product4.Id,
-                ColourId = 2
-            };
-
-            var productItem16 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product4.Id,
-                ColourId = 5
-            };
-
-            var productItem17 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product4.Id,
-                ColourId = 6
-            };
-
-            var productItem18 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product5.Id,
-                ColourId = 2
-            };
-
-            var productItem19 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product5.Id,
-                ColourId = 3
-            };
-
-            var productItem20 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product5.Id,
-                ColourId = 6
-            };
-
-            var productItem21 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product6.Id,
-                ColourId = 2
-            };
-
-            var productItem22 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product6.Id,
-                ColourId = 1
-            };
-
-            var productItem23 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product6.Id,
-                ColourId = 3
-            };
-
-            var productItem24 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product7.Id,
-                ColourId = 2
-            };
-
-            var productItem25 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product7.Id,
-                ColourId = 4
-            };
-
-            var productItem26 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product8.Id,
-                ColourId = 4
-            };
-
-            var productItem27 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product8.Id,
-                ColourId = 6
-            };
-
-            var productItem28 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product9.Id,
-                ColourId = 2
-            };
-
-            var productItem29 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product9.Id,
-                ColourId = 3
-            };
-
-            var productItem30 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product9.Id,
-                ColourId = 4
-            };
-
-            var productItem31 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product10.Id,
-                ColourId = 1
-            };
-
-            var productItem32 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product10.Id,
-                ColourId = 2
-            };
-
-            var productItem33 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product10.Id,
-                ColourId = 5
-            };
-
-            var productItem34 = new ProductItem
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product10.Id,
-                ColourId = 6
-            };
-
-            modelBuilder.Entity<ProductItem>().HasData(
-                productItem1,
-                productItem2,
-                productItem3,
-                productItem4,
-                productItem5,
-                productItem6,
-                productItem7,
-                productItem8,
-                productItem9,
-                productItem10,
-                productItem11,
-                productItem12,
-                productItem13,
-                productItem14,
-                productItem15,
-                productItem16,
-                productItem17,
-                productItem18,
-                productItem19,
-                productItem20,
-                productItem21,
-                productItem22,
-                productItem23,
-                productItem24,
-                productItem25,
-                productItem26,
-                productItem27,
-                productItem28,
-                productItem29,
-                productItem30,
-                productItem31,
-                productItem32,
-                productItem33,
-                productItem34
-
-            );
-
-            // Seeding data for ProductVariations
+            // Seeding data for ProductVariants
             modelBuilder.Entity<ProductVariant>().HasData(
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem1.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem1.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem1.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem1.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem1.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem1.Id, SizeId = 6, QuantityInStock = 5 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem2.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem2.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem2.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem2.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem2.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem3.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem3.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem3.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem3.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem3.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem3.Id, SizeId = 6, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem4.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem4.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem4.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem4.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem4.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem4.Id, SizeId = 6, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem5.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem5.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem5.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem5.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem5.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem5.Id, SizeId = 6, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem6.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem6.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem6.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem6.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem6.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem6.Id, SizeId = 6, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem7.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem7.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem7.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem7.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem7.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem7.Id, SizeId = 6, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem8.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem8.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem8.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem8.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem8.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem8.Id, SizeId = 6, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem9.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem9.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem9.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem9.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem9.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem9.Id, SizeId = 6, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem10.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem10.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem10.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem10.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem10.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem10.Id, SizeId = 6, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem11.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem11.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem11.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem11.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem11.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem11.Id, SizeId = 6, QuantityInStock = 5 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem12.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem12.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem12.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem12.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem12.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem12.Id, SizeId = 6, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem13.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem13.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem13.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem13.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem13.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem13.Id, SizeId = 6, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem14.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem14.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem14.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem14.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem14.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem14.Id, SizeId = 6, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem15.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem15.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem15.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem15.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem15.Id, SizeId = 6, QuantityInStock = 10 }, 
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem16.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem16.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem16.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem16.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem17.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem17.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem17.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem17.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem17.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem18.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem18.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem18.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem18.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem18.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem18.Id, SizeId = 6, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem19.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem19.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem19.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem19.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem19.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem19.Id, SizeId = 6, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem20.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem20.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem20.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem20.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem20.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem20.Id, SizeId = 6, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem21.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem21.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem21.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem21.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem21.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem21.Id, SizeId = 6, QuantityInStock = 5 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem22.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem22.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem22.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem22.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem22.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem22.Id, SizeId = 6, QuantityInStock = 5 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem23.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem23.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem23.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem23.Id, SizeId = 6, QuantityInStock = 5 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem24.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem24.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem24.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem24.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem24.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem24.Id, SizeId = 6, QuantityInStock = 5 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem25.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem25.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem25.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem25.Id, SizeId = 6, QuantityInStock = 5 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem26.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem26.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem26.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem26.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem26.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem26.Id, SizeId = 6, QuantityInStock = 5 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem27.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem27.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem27.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem27.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem27.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem27.Id, SizeId = 6, QuantityInStock = 5 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem28.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem28.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem28.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem28.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem28.Id, SizeId = 6, QuantityInStock = 5 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem29.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem29.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem29.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem29.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem29.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem29.Id, SizeId = 6, QuantityInStock = 5 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem30.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem30.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem30.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem30.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem30.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem30.Id, SizeId = 6, QuantityInStock = 5 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem31.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem31.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem31.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem31.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem31.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem31.Id, SizeId = 6, QuantityInStock = 5 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem32.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem32.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem32.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem32.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem32.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem32.Id, SizeId = 6, QuantityInStock = 5 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem33.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem33.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem33.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem33.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem33.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem33.Id, SizeId = 6, QuantityInStock = 5 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem34.Id, SizeId = 1, QuantityInStock = 50 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem34.Id, SizeId = 2, QuantityInStock = 40 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem34.Id, SizeId = 3, QuantityInStock = 30 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem34.Id, SizeId = 4, QuantityInStock = 20 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem34.Id, SizeId = 5, QuantityInStock = 10 },
-                new ProductVariant { Id = Guid.NewGuid(), ProductItemId = productItem34.Id, SizeId = 6, QuantityInStock = 5 }
+                new ProductVariant { ProductId = product1.Id, VariantNumber = 1, ColourId = 1, SizeId = 1, QuantityInStock = 50 },
+                new ProductVariant { ProductId = product1.Id, VariantNumber = 2, ColourId = 1, SizeId = 2, QuantityInStock = 40 },
+                new ProductVariant { ProductId = product1.Id, VariantNumber = 3, ColourId = 2, SizeId = 1, QuantityInStock = 30 },
+                new ProductVariant { ProductId = product1.Id, VariantNumber = 4, ColourId = 2, SizeId = 2, QuantityInStock = 20 },
+                new ProductVariant { ProductId = product1.Id, VariantNumber = 5, ColourId = 2, SizeId = 3, QuantityInStock = 10 },
+                new ProductVariant { ProductId = product1.Id, VariantNumber = 6, ColourId = 2, SizeId = 4, QuantityInStock = 5 },
+                new ProductVariant { ProductId = product2.Id, VariantNumber = 1, ColourId = 1, SizeId = 1, QuantityInStock = 50 },
+                new ProductVariant { ProductId = product2.Id, VariantNumber = 2, ColourId = 1, SizeId = 2, QuantityInStock = 40 },
+                new ProductVariant { ProductId = product2.Id, VariantNumber = 3, ColourId = 3, SizeId = 2, QuantityInStock = 30 },
+                new ProductVariant { ProductId = product2.Id, VariantNumber = 4, ColourId = 3, SizeId = 3, QuantityInStock = 20 },
+                new ProductVariant { ProductId = product2.Id, VariantNumber = 5, ColourId = 3, SizeId = 4, QuantityInStock = 10 },
+                new ProductVariant { ProductId = product3.Id, VariantNumber = 1, ColourId = 1, SizeId = 1, QuantityInStock = 50 },
+                new ProductVariant { ProductId = product3.Id, VariantNumber = 2, ColourId = 1, SizeId = 2, QuantityInStock = 40 },
+                new ProductVariant { ProductId = product3.Id, VariantNumber = 3, ColourId = 1, SizeId = 3, QuantityInStock = 30 },
+                new ProductVariant { ProductId = product3.Id, VariantNumber = 4, ColourId = 4, SizeId = 3, QuantityInStock = 20 },
+                new ProductVariant { ProductId = product3.Id, VariantNumber = 5, ColourId = 4, SizeId = 4, QuantityInStock = 10 },
+                new ProductVariant { ProductId = product3.Id, VariantNumber = 6, ColourId = 5, SizeId = 3, QuantityInStock = 10 }
             );
         }
 
@@ -716,6 +340,7 @@ namespace EcommerceApp.DAL
         public DbSet<Review> Reviews { get; set; }
         public DbSet<PageVisit> PageVisits { get; set; }
         public DbSet<ShippingMethod> ShippingMethods { get; set; }
+        public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Order> Orders { get; set; }
@@ -723,9 +348,7 @@ namespace EcommerceApp.DAL
         public DbSet<ReviewImage> ReviewImages { get; set; }
         public DbSet<ProductCategory> ProductCategories { get; set; }
         public DbSet<Image> Images { get; set; }
-        public DbSet<ProductItem> ProductItems { get; set; }
         public DbSet<PaymentMethod> PaymentMethods { get; set; }
-        public DbSet<OrderStatus> OrderStatuses { get; set; }
         public DbSet<Size> Sizes { get; set; }
         public DbSet<Colour> Colours { get; set; }
         public DbSet<ProductVariant> ProductVariants { get; set; }

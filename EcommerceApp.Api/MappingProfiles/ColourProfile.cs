@@ -9,8 +9,7 @@ namespace EcommerceApp.Api.MappingProfiles
         public ColourProfile()
         {
             CreateMap<Colour, ColourGetDto>()
-                .ForMember(dest => dest.ColourCode, config => config.MapFrom(src => src.Value))
-                .ReverseMap();
+                .ForMember(dest => dest.ColourCode, config => config.MapFrom(src => src.Value));
         }
     }
 }

@@ -2,12 +2,13 @@
 using EcommerceApp.Api.CustomFilters;
 using EcommerceApp.Api.Dtos.AuthenticationDtos;
 using EcommerceApp.Api.Services.Interfaces;
+using EcommerceApp.Domain.Constants;
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
-using EcommerceApp.Domain.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using System.Data;
 
 namespace EcommerceApp.Api.Controllers.V1
 {
@@ -19,40 +20,29 @@ namespace EcommerceApp.Api.Controllers.V1
     {
         private readonly UserManager<AppUser> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
-        private readonly IJwtService jwtService;
         private readonly ICartRepository cartRepository;
+        private readonly IJwtService jwtService;
         private readonly IMapper mapper;
 
-        public AuthController(UserManager<AppUser> userManager,
+        public AuthController(
+            UserManager<AppUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            IJwtService jwtService,
             ICartRepository cartRepository,
+            IJwtService jwtService,
             IMapper mapper)
         {
             this.userManager = userManager;
             this.roleManager = roleManager;
-            this.jwtService = jwtService;
             this.cartRepository = cartRepository;
+            this.jwtService = jwtService;
             this.mapper = mapper;
         }
 
-        [HttpPost("")]
-        
+        [HttpPost]
         public async Task<IActionResult> RegisterUser([FromBody] AppUserCreateDto appUserCreateDto)
         {
             var user = mapper.Map<AppUser>(appUserCreateDto);
             user.RegistrationDate = DateTime.Now;
-
-            var result = await userManager.CreateAsync(user, appUserCreateDto.Password);
-
-            if (!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.TryAddModelError(error.Code, error.Description);
-                }
-                return BadRequest(ModelState);
-            }
 
             if (!await roleManager.RoleExistsAsync(UserRoleConstant.Customer))
             {
@@ -68,7 +58,31 @@ namespace EcommerceApp.Api.Controllers.V1
                 }
             }
 
-            await userManager.AddToRoleAsync(user, "Customer");
+            var result = await userManager.CreateAsync(user, appUserCreateDto.Password);
+
+            if (!result.Succeeded)
+            {
+                return StatusCode(500);
+            }
+
+            var addResult = await userManager.AddToRoleAsync(user, UserRoleConstant.Customer);
+
+            if (!addResult.Succeeded)
+            {
+                await userManager.DeleteAsync(user);
+                return StatusCode(500);
+            }
+
+            var cart = await cartRepository.CreateCartAsync(new Cart() 
+            { 
+                AppUserId = user.Id 
+            });
+
+            if (cart == null)
+            {
+                await userManager.DeleteAsync(user);
+                return StatusCode(500);
+            }
 
             return Created();
         }

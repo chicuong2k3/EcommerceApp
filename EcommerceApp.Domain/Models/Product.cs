@@ -20,7 +20,7 @@ namespace EcommerceApp.Domain.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal SalePrice { get; set; }
 
-        public ICollection<ProductItem> ProductItems { get; set; }
-        public ICollection<ProductCategory> ProductCategories { get; set; }
+        public ICollection<ProductVariant> ProductVariants { get; set; } = new List<ProductVariant>();
+        public ICollection<ProductCategory> ProductCategories { get; set; } = new List<ProductCategory>();
     }
 }

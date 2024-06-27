@@ -8,7 +8,7 @@ namespace EcommerceApp.Api.MappingProfiles
     {
         public CategoryProfile()
         {
-            CreateMap<Category, CategoryGetDto>().ReverseMap();
+            CreateMap<Category, CategoryGetDto>();
             CreateMap<Category, CategoryCreateUpdateDto>().ReverseMap();
         }
     }
