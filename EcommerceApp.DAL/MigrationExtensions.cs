@@ -17,7 +17,7 @@ namespace EcommerceApp.DAL
                     {
                         context.Database.Migrate();
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         
                     }

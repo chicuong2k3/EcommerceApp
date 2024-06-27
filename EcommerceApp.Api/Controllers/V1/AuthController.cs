@@ -38,7 +38,7 @@ namespace EcommerceApp.Api.Controllers.V1
             this.mapper = mapper;
         }
 
-        [HttpPost]
+        [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] AppUserCreateDto appUserCreateDto)
         {
             var user = mapper.Map<AppUser>(appUserCreateDto);

@@ -10,6 +10,7 @@ using EcommerceApp.Domain.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Threading.RateLimiting;
 
@@ -188,5 +189,66 @@ namespace EcommerceApp.Api.ExtensionMethods
             services.AddTransient<IJwtService, JwtService>();
             return services;
         }
+
+        public static void AddSwaggerConfiguration(this IServiceCollection services)
+        {
+            services.AddSwaggerGen(setup =>
+            {
+                setup.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Clothing Store API v1",
+                    Version = "v1",
+                    Description = "",
+                    //TermsOfService = new Uri(""),
+                    Contact = new OpenApiContact()
+                    {
+                        Name = "Chí Cường",
+                        Email = "nguyenchicuongk21@gmail.com",
+                        Url = new Uri("https://www.facebook.com/chicuong2k3")
+                    },
+                    License = new OpenApiLicense()
+                    {
+                        Name = "",
+                        //Url = new Uri("")
+                    }
+                });
+                setup.SwaggerDoc("v2", new OpenApiInfo
+                {
+                    Title = "Clothing Store API v2",
+                    Version = "v2"
+                });
+
+                setup.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Add JWT with Bearer",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+
+                setup.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme()
+                        {
+                            Reference = new OpenApiReference()
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            Name = "Bearer"
+                        },
+                        new List<string>()
+                    }
+                });
+
+                var xmlFile = $"{typeof(Program).Assembly.GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                setup.IncludeXmlComments(xmlPath);
+
+            });
+        }
+
     }
 }

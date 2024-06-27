@@ -93,6 +93,9 @@ builder.Services.AddIdentity();
 // this must be placed after AddIdentity
 builder.Services.AddJWTAuthentication(builder.Configuration);
 
+// Swagger
+builder.Services.AddSwaggerConfiguration();
+
 var app = builder.Build();
 
 NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter(IServiceProvider serviceProvider)
@@ -113,7 +116,11 @@ app.Services.GetRequiredService<IOptions<MvcOptions>>().Value.InputFormatters.In
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(setup =>
+    {
+        setup.SwaggerEndpoint("/swagger/v1/swagger.json", "Clothing Store API v1");
+        setup.SwaggerEndpoint("/swagger/v2/swagger.json", "Clothing Store API v2");
+    });
     app.UseCustomExceptionHandler();
 }
 

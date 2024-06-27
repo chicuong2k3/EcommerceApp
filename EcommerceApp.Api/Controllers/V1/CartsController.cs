@@ -36,6 +36,13 @@ namespace EcommerceApp.Api.Controllers.V1
             this.mapper = mapper;
         }
 
+        /// <summary>
+        /// Get the cart of the current authenticated user
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200">Return the cart of the current authenticated user</response>
+        /// <response code="400">The user has no cart</response>
+        /// <response code="422">The request is not valid</response>
         [HttpGet]
         [SkipCartOwnerCheck]
         public async Task<IActionResult> GetCart()

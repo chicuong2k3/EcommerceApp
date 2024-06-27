@@ -14,6 +14,7 @@ using EcommerceApp.Domain.Constants;
 namespace EcommerceApp.Api.Controllers.V1
 {
     //[ApiVersion("1.0", Deprecated = false)]
+    [ApiExplorerSettings(GroupName = "v1")]
     [ApiController]
     [Route("/api/[controller]")]
     [ServiceFilter(typeof(ValidationFilterAttribute))]
