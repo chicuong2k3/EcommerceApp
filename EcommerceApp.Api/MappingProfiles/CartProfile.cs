@@ -14,6 +14,10 @@ namespace EcommerceApp.Api.MappingProfiles
                 .ForMember(dest => dest.CartItemId, config => config.MapFrom(src => src.Id));
             CreateMap<Product, CartItemGetDto>();
             CreateMap<PagedData<CartItem>, PagedDataDto<CartItemGetDto>>();
+
+            CreateMap<Cart, CartGetDto>()
+                .ForMember(dest => dest.CartId, config => config.MapFrom(src => src.Id))
+                .ForMember(dest => dest.UserId, config => config.MapFrom(src => src.AppUserId));
         }
     }
 }

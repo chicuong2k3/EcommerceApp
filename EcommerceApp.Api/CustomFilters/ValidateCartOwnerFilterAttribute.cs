@@ -7,6 +7,7 @@ using System.Security.Claims;
 
 namespace EcommerceApp.Api.CustomFilters
 {
+    public class SkipCartOwnerCheckAttribute : Attribute { }
     public class ValidateCartOwnerFilterAttribute : IAsyncActionFilter
     {
         private readonly ICartRepository cartRepository;
@@ -22,21 +23,37 @@ namespace EcommerceApp.Api.CustomFilters
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
+            var skipAttribute = context.ActionDescriptor
+                .EndpointMetadata
+                .OfType<SkipCartOwnerCheckAttribute>()
+                .SingleOrDefault();
+
+            if (skipAttribute != null)
+            {
+                await next();
+                return;
+            }
+
 
             var user = await userManager.FindByNameAsync(
                 context.HttpContext.User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
 
-            var cartId = context.ActionArguments.FirstOrDefault(x => x.Key == "cartId").Value;
+            if (user == null)
+            {
+                context.Result = new UnauthorizedResult();
+                return;
+            }
 
-            if (!Guid.TryParse(cartId?.ToString(), out var result))
+            if (!context.ActionArguments.TryGetValue("cartId", out var cartIdObj) ||
+                !Guid.TryParse(cartIdObj?.ToString(), out var cartId))
             {
                 context.Result = new BadRequestObjectResult("The request is not valid.");
                 return;
             }
 
-            var cartOwnerId = await cartRepository.GetCartOwnerIdAsync(result);
+            var cartOwnerId = await cartRepository.GetCartOwnerIdAsync(cartId);
 
-            if (user == null || user.Id != cartOwnerId)
+            if (user.Id != cartOwnerId)
             {
                 context.Result = new BadRequestObjectResult("The user does not possess this cart.");
                 return;

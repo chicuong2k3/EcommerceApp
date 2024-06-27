@@ -37,6 +37,7 @@ namespace EcommerceApp.Api.Controllers.V1
         }
 
         [HttpGet]
+        [SkipCartOwnerCheck]
         public async Task<IActionResult> GetCart()
         {
             var user = await userManager.FindByNameAsync(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
@@ -50,7 +51,9 @@ namespace EcommerceApp.Api.Controllers.V1
 
             if (cart == null) return NotFound();
 
-            return Ok(cart);
+            var cartDto = mapper.Map<CartGetDto>(cart);
+
+            return Ok(cartDto);
         }
 
         [HttpGet("{cartId}/items")]
@@ -59,7 +62,10 @@ namespace EcommerceApp.Api.Controllers.V1
             var cartItems = await cartRepository.GetCartItemsAsync(cartId, queryParameters);
             var result = mapper.Map<PagedDataDto<CartItemGetDto>>(cartItems);
 
-            return Ok(new { data = result.Items, pagination = result.Pagination });
+            return Ok(new { 
+                data = result.Items, 
+                pagination = result.Pagination
+            });
         }
 
         [HttpGet("{cartId}/items/{cartItemId}")]

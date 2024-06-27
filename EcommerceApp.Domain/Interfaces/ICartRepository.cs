@@ -14,5 +14,7 @@ namespace EcommerceApp.Domain.Interfaces
         Task<string> GetCartOwnerIdAsync(Guid cartId);
         Task<Cart?> GetCartByOwnerIdAsync(string userId);
         Task ClearCartAsync(Guid cartId);
+
+        decimal GetTotalPrice(Guid cartId);
     }
 }

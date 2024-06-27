@@ -135,6 +135,16 @@ namespace EcommerceApp.DAL.Repositories
             return cart.AppUserId;
         }
 
+        public decimal GetTotalPrice(Guid cartId)
+        {
+            var cartItems = dbContext.CartItems.Where(x => x.CartId == cartId);
+
+            var temp = dbContext.Products
+                .Join(cartItems, p => p.Id, c => c.ProductId, (p, c) => new { p.SalePrice, c.Quantity });
+
+            return temp.Sum(x => x.SalePrice * x.Quantity);
+        }
+
         public async Task RemoveProductAsync(Guid cartItemId, int quantity)
         {
             
