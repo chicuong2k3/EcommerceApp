@@ -332,11 +332,20 @@ namespace EcommerceApp.DAL
                 new ProductVariant { ProductId = product3.Id, VariantNumber = 5, ColourId = 4, SizeId = 4, QuantityInStock = 10 },
                 new ProductVariant { ProductId = product3.Id, VariantNumber = 6, ColourId = 5, SizeId = 3, QuantityInStock = 10 }
             );
+
+            // Seeding data for OrderStatuses
+            modelBuilder.Entity<OrderStatus>().HasData(
+                new OrderStatus() { Id = 1, Value = "Pending" },
+                new OrderStatus() { Id = 2, Value = "Paid" },
+                new OrderStatus() { Id = 3, Value = "Delivery" },
+                new OrderStatus() { Id = 4, Value = "Cancelled" },
+                new OrderStatus() { Id = 5, Value = "Completed" },
+                new OrderStatus() { Id = 6, Value = "Failed" }
+            );
         }
 
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
-        public DbSet<Address> Addresses { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<PageVisit> PageVisits { get; set; }
         public DbSet<ShippingMethod> ShippingMethods { get; set; }
@@ -352,5 +361,6 @@ namespace EcommerceApp.DAL
         public DbSet<Size> Sizes { get; set; }
         public DbSet<Colour> Colours { get; set; }
         public DbSet<ProductVariant> ProductVariants { get; set; }
+        public DbSet<OrderStatus> OrderStatuses { get; set; }
     }
 }

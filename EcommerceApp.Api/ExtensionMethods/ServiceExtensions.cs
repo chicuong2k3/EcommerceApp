@@ -23,6 +23,8 @@ namespace EcommerceApp.Api.ExtensionMethods
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<ICartRepository, CartRepository>();
+            services.AddScoped<IReviewRepository, ReviewRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
             return services;
         }
 

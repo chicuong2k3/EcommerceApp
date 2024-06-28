@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace EcommerceApp.Domain.Shared
+namespace EcommerceApp.Domain.Shared.Extensions
 {
     public static class StringExtensions
     {
@@ -19,7 +19,7 @@ namespace EcommerceApp.Domain.Shared
             for (int i = 0; i < length; ++i)
             {
                 c = title[i];
-                if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'))
+                if (c >= 'a' && c <= 'z' || c >= '0' && c <= '9')
                 {
                     stringBuilder.Append(c);
                     prevdash = false;
@@ -30,10 +30,10 @@ namespace EcommerceApp.Domain.Shared
                     stringBuilder.Append((char)(c | 32));
                     prevdash = false;
                 }
-                else if ((c == ' ') || (c == ',') || (c == '.') || (c == '/') ||
-                  (c == '\\') || (c == '-') || (c == '_') || (c == '='))
+                else if (c == ' ' || c == ',' || c == '.' || c == '/' ||
+                  c == '\\' || c == '-' || c == '_' || c == '=')
                 {
-                    if (!prevdash && (stringBuilder.Length > 0))
+                    if (!prevdash && stringBuilder.Length > 0)
                     {
                         stringBuilder.Append('-');
                         prevdash = true;
@@ -107,7 +107,7 @@ namespace EcommerceApp.Domain.Shared
             }
             else
             {
-                return character.ToString();  
+                return character.ToString();
             }
         }
 

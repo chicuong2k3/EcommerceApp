@@ -45,7 +45,7 @@ namespace EcommerceApp.Api.Controllers.V1
         /// <response code="422">The request is not valid</response>
         [HttpGet]
         [SkipCartOwnerCheck]
-        public async Task<IActionResult> GetCart()
+        public async Task<IActionResult> GetCartOfCurrentCustomer()
         {
             var user = await userManager.FindByNameAsync(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
 
@@ -64,7 +64,7 @@ namespace EcommerceApp.Api.Controllers.V1
         }
 
         [HttpGet("{cartId}/items")]
-        public async Task<IActionResult> GetCartItems(Guid cartId, [FromQuery] CartItemQueryParameters queryParameters)
+        public async Task<IActionResult> ListCartItems(Guid cartId, [FromQuery] CartItemQueryParameters queryParameters)
         {
             var cartItems = await cartRepository.GetCartItemsAsync(cartId, queryParameters);
             var result = mapper.Map<PagedDataDto<CartItemGetDto>>(cartItems);
@@ -111,7 +111,7 @@ namespace EcommerceApp.Api.Controllers.V1
 
             await cartRepository.RemoveProductAsync(cartItemId, quantity);
 
-            return Ok("Removed product from cart successfully.");
+            return Ok("Removed the product from cart successfully.");
         }
 
         [HttpDelete("{cartId}/items")]

@@ -10,7 +10,8 @@ namespace EcommerceApp.Domain.Models
         public Guid Id { get; set; }
         public int ShippingMethodId { get; set; }
         public required string AppUserId { get; set; }
-        public int AddressId { get; set; }
+        [MaxLength(250)]
+        public required string Address { get; set; }
         [MaxLength(20)]
         public required string PhoneNumber { get; set; }
         [Column(TypeName = "decimal(18,2)")]
@@ -21,11 +22,11 @@ namespace EcommerceApp.Domain.Models
         public int PaymentMethodId { get; set; }
         [Column(TypeName = "decimal(18,2)")]
         public decimal Total { get; set; }
+        public int OrderStatusId { get; set; }
         public ShippingMethod? ShippingMethod { get; set; }
         public AppUser? AppUser { get; set; }
-        public Address? Address { get; set; }
         public PaymentMethod? PaymentMethod { get; set; }
-        [MaxLength(50)]
-        public string OrderStatus { get; set; } = OrderStatusConstant.Pending;
+        public OrderStatus? OrderStatus { get; set; }
+        public ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
     }
 }

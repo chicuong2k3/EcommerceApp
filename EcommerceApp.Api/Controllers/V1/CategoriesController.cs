@@ -10,6 +10,7 @@ using EcommerceApp.Api.Dtos.CategoryDtos;
 using EcommerceApp.Api.Dtos.SharedDtos;
 using Microsoft.AspNetCore.Authorization;
 using EcommerceApp.Domain.Constants;
+using EcommerceApp.Domain.Shared.Extensions;
 
 namespace EcommerceApp.Api.Controllers.V1
 {

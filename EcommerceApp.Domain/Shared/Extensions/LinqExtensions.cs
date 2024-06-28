@@ -1,8 +1,7 @@
 ﻿using EcommerceApp.Domain.Models;
 using System.Linq.Dynamic.Core;
-using System.Reflection;
 
-namespace EcommerceApp.Domain.Shared
+namespace EcommerceApp.Domain.Shared.Extensions
 {
     public static class LinqExtensions
     {
@@ -13,7 +12,7 @@ namespace EcommerceApp.Domain.Shared
                 return list.OrderBy("Name");
             }
 
-            var orderQuery = OrderQueryBuilder.CreateOrderQuery<Product>(orderQueryString);
+            var orderQuery = SortQueryBuilder.CreateSortQuery<Product>(orderQueryString);
 
             if (string.IsNullOrEmpty(orderQuery))
             {

@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EcommerceApp.Domain.Shared
 {
-    public class OrderQueryBuilder
+    public class SortQueryBuilder
     {
-        public static string CreateOrderQuery<T>(string raw)
+        public static string CreateSortQuery<T>(string raw)
         {
             var orderParams = raw.Trim().Split(',');
             var propertyInfos = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);

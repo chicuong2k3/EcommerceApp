@@ -110,7 +110,6 @@ namespace EcommerceApp.DAL.Repositories
         public async Task<PagedData<CartItem>> GetCartItemsAsync(Guid cartId, CartItemQueryParameters queryParameters)
         {
             var items = dbContext.CartItems.AsNoTracking();
-            
 
             var totalItems = await items.CountAsync();
 

@@ -2,6 +2,7 @@
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
 using EcommerceApp.Domain.Shared;
+using EcommerceApp.Domain.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApp.DAL.Repositories
