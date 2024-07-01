@@ -7,6 +7,7 @@ using EcommerceApp.Domain.Shared;
 using EcommerceApp.Api.Dtos.SharedDtos;
 using Microsoft.AspNetCore.Authorization;
 using EcommerceApp.Api.Dtos.ReviewDtos;
+using EcommerceApp.DAL.Repositories;
 
 namespace EcommerceApp.Api.Controllers.V1
 {
@@ -74,10 +75,17 @@ namespace EcommerceApp.Api.Controllers.V1
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> UpdateReview(Guid id, [FromBody] ReviewUpdateDto reviewUpdateDto)
         {
+            var existingReview = await reviewRepository.GetByIdAsync(id);
+
             var updatedReview = mapper.Map<Review>(reviewUpdateDto);
             updatedReview.Id = id;
 
             await reviewRepository.UpdateAsync(updatedReview);
+
+            if (existingReview == null)
+            {
+                return CreatedAtAction(nameof(GetReviewById), new { id }, updatedReview);
+            }
 
             return Ok("Updated the review successfully.");
         }

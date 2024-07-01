@@ -85,10 +85,17 @@ namespace EcommerceApp.Api.Controllers.V1
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryCreateUpdateDto categoryCreateUpdateDto)
         {
+            var existingCategory = await categoryRepository.GetByIdAsync(id);
+
             var updatedCategory = mapper.Map<Category>(categoryCreateUpdateDto);
             updatedCategory.Id = id;
 
             await categoryRepository.UpdateAsync(updatedCategory);
+
+            if (existingCategory == null)
+            {
+                return CreatedAtAction(nameof(GetCategoryById), new { id }, updatedCategory);
+            }
 
             return Ok("Updated the category successfully.");
         }

@@ -117,6 +117,9 @@ namespace EcommerceApp.Api.Controllers.V1
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] ProductUpdateDto productUpdateDto)
         {
+
+            var existingProduct = await productRepository.GetByIdAsync(id);
+
             var updatedProduct = mapper.Map<Product>(productUpdateDto);
             updatedProduct.Id = id;
 
@@ -130,7 +133,13 @@ namespace EcommerceApp.Api.Controllers.V1
 
             }
 
+
             await productRepository.UpdateAsync(updatedProduct);
+
+            if (existingProduct == null)
+            {
+                return CreatedAtAction(nameof(GetProductById), new { id }, updatedProduct);
+            }
 
             return Ok("Updated the product successfully.");
         }

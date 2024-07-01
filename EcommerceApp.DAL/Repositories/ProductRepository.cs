@@ -52,12 +52,6 @@ namespace EcommerceApp.DAL.Repositories
 
         public async Task UpdateAsync(Product product)
         {
-            var exist = dbContext.Products.Any(x => x.Id == product.Id);
-
-            if (!exist)
-            {
-                throw new NotFoundException("Cannot find the product to update.");
-            }
 
             dbContext.Products.Update(product);
             await dbContext.SaveChangesAsync();
