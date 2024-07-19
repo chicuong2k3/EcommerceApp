@@ -131,7 +131,7 @@ namespace EcommerceApp.Api.Services.Implementations
         {
             var principal = GetPrincipalFromAccessToken(tokenDto.AccessToken);
 
-            var user = await userManager.FindByNameAsync(principal.Identity.Name);
+            var user = await userManager.FindByNameAsync(principal.Identity?.Name ?? string.Empty);
             if (user == null || user.RefreshToken != tokenDto.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
                 return null;
 

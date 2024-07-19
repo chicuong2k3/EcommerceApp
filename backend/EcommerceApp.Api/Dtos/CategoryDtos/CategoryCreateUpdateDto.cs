@@ -6,6 +6,7 @@ namespace EcommerceApp.Api.Dtos.CategoryDtos
     {
         [MaxLength(50)]
         [MinLength(3)]
-        public required string Name { get; set; }
+        [Required]
+        public string Name { get; set; } = default!;
     }
 }

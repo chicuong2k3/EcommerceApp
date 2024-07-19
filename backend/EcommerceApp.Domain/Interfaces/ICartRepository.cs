@@ -1,5 +1,5 @@
-﻿using EcommerceApp.Domain.Models;
-using EcommerceApp.Domain.Shared;
+﻿using EcommerceApp.Common.Shared;
+using EcommerceApp.Domain.Models;
 
 namespace EcommerceApp.Domain.Interfaces
 {

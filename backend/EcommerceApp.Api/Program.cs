@@ -1,5 +1,4 @@
 using EcommerceApp.Api.ExtensionMethods;
-using EcommerceApp.DAL;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,10 +7,20 @@ using EcommerceApp.Api.CustomFilters;
 using Serilog;
 using EcommerceApp.Api.Formatters;
 using System.Text.Json.Serialization;
+using EcommerceApp.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAnyOrigin", config =>
+    {
+        config.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
+});
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -30,7 +39,7 @@ builder.Services.AddControllers(config =>
     config.RespectBrowserAcceptHeader = true;
     config.ReturnHttpNotAcceptable = true; // return 406 status code if clients negotiate for media type the server does not support
 
-    config.OutputFormatters.Add(new CsvOutputFormatter());
+    //config.OutputFormatters.Add(new CsvOutputFormatter());
 
     // config.Filters.Add(); // add global action filters
 
@@ -53,7 +62,7 @@ builder.Services.AddControllers(config =>
 // Add Filters
 builder.Services.AddScoped<ValidationFilterAttribute>();
 builder.Services.AddScoped<ValidateMediaTypeAttribute>();
-builder.Services.AddScoped<ValidateCartOwnerFilterAttribute>();
+//builder.Services.AddScoped<ValidateCartOwnerFilterAttribute>();
 
 
 builder.Services.AddHttpContextAccessor();
@@ -97,6 +106,8 @@ builder.Services.AddJWTAuthentication(builder.Configuration);
 builder.Services.AddSwaggerConfiguration();
 
 var app = builder.Build();
+
+app.UseCors("AllowAnyOrigin");
 
 NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter(IServiceProvider serviceProvider)
 {

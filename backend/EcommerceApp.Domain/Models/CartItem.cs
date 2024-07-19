@@ -2,12 +2,11 @@
 {
     public class CartItem
     {
-        public Guid Id { get; set; }
-        public Guid ProductId { get; set; }
-        public int VariantNumber { get; set; }
+        public string Id { get; set; } = default!;
+        public Guid ProductItemId { get; set; }
         public int Quantity { get; set; }
-        public Guid CartId { get; set; }
-        public ProductVariant? ProductVariant { get; set; }
-        public Cart? Cart { get; set; }
+        public string CartId { get; set; } = default!;
+        public ProductItem ProductItem { get; set; } = default!;
+        public Cart Cart { get; set; } = default!;
     }
 }

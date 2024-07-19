@@ -1,4 +1,4 @@
-﻿using EcommerceApp.Domain.Exceptions;
+﻿using EcommerceApp.Common.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using System.Text.Json;
 
@@ -35,7 +35,8 @@ namespace EcommerceApp.Api.ExtensionMethods
                     {
                         context.Response.StatusCode = contextFeature.Error switch
                         {
-                            NotFoundException => StatusCodes.Status404NotFound,
+                            _ when IsBadRequestException(contextFeature.Error) => StatusCodes.Status400BadRequest,
+                            _ when IsNotFoundException(contextFeature.Error) => StatusCodes.Status404NotFound,
                             _ => StatusCodes.Status500InternalServerError
                         };
 
@@ -48,6 +49,24 @@ namespace EcommerceApp.Api.ExtensionMethods
                     }
                 });
             });
+        }
+
+        private static bool IsBadRequestException(Exception exception)
+        {
+            if (exception.GetType().IsGenericType && exception.GetType().GetGenericTypeDefinition() == typeof(BadRequestException<>))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private static bool IsNotFoundException(Exception exception)
+        {
+            if (exception.GetType().IsGenericType && exception.GetType().GetGenericTypeDefinition() == typeof(NotFoundException<,>))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

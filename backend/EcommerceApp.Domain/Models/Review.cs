@@ -5,13 +5,11 @@ namespace EcommerceApp.Domain.Models
     public class Review
     {
         public Guid Id { get; set; }
-        [MaxLength(1024)]
-        [MinLength(10)]
-        public required string Comment { get; set; }
+        public string Comment { get; set; } = default!;
         public short Rating { get; set; }
-        public required string AppUserId { get; set; }
+        public string AppUserId { get; set; } = default!;
         public Guid OrderLineId { get; set; }
-        public AppUser? AppUser { get; set; }
-        public OrderLine? OrderLine { get; set; }
+        public ProductVariation AppUser { get; set; } = default!;
+        public OrderLine OrderLine { get; set; } = default!;
     }
 }

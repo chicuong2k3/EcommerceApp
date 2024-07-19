@@ -1,0 +1,185 @@
+﻿@page "/admin/products"
+@using EcommerceApp.BlazorWeb.Components.Product
+
+
+<MudTable ServerData="ServerReload" Dense="true" Hover="true" Bordered="true" @ref="table">
+    <ToolBarContent>
+        <MudTooltip Text="Thêm sản phẩm" Duration="500">
+            <MudFab Color="Color.Success"
+                    Size="Size.Small" DropShadow="false"
+                    StartIcon="@Icons.Material.Filled.Add"
+                    OnClick="() => OpenAddDialog()" />
+        </MudTooltip>
+        <MudSpacer />
+        <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Immediate="true"
+                      Placeholder="Tìm kiếm" Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium">
+        </MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>
+            <MudTableSortLabel SortLabel="name_field"
+                               InitialDirection="SortDirection.Ascending"
+                               T="Product">
+                Tên sản phẩm
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>Mô tả sản phẩm</MudTh>
+        <MudTh>Hành động</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Name</MudTd>
+        <MudTd>@context.Description</MudTd>
+        <MudTd>
+            <MudTooltip Text="Sửa sản phẩm" Duration="500">
+                <MudFab StartIcon="@Icons.Material.Filled.Edit" DropShadow="false"
+                        Color="Color.Warning" Size="Size.Small"
+                        OnClick="() => OpenUpdateDialog(context)" />
+            </MudTooltip>
+            <MudTooltip Text="Xóa sản phẩm" Duration="500">
+                <MudFab StartIcon="@Icons.Material.Filled.Delete" DropShadow="false"
+                        Color="Color.Error" Size="Size.Small"
+                        OnClick="() => OpenDeleteDialog(context)" />
+            </MudTooltip>
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>Không có dữ liệu</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <MudText>Đang tải...</MudText>
+    </LoadingContent>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[] { 5, 10, 50 }"
+                       RowsPerPageString="@("Số dòng mỗi trang:")"
+                       InfoFormat="@("Dòng {first_item}-{last_item}/{all_items} dòng")"
+                       HorizontalAlignment="HorizontalAlignment.Right" />
+    </PagerContent>
+</MudTable>
+
+@code {
+    private MudTable<Product>? table;
+    private List<Product> pagedData = [];
+    private int totalItems;
+    private string? searchString = null;
+
+    private void OnSearch(string text)
+    {
+        searchString = text;
+        table?.ReloadServerData();
+    }
+
+    private async Task<TableData<Product>> ServerReload(TableState state, CancellationToken token)
+    {
+        var sortBy = new StringBuilder();
+
+        if (!string.IsNullOrEmpty(state.SortLabel))
+        {
+            switch (state.SortLabel)
+            {
+                case "name_field":
+                    sortBy.Append("name");
+                    if (state.SortDirection == SortDirection.Ascending)
+                    {
+                        sortBy.Append(" desc");
+                    }
+                    break;
+
+            }
+
+        }
+
+        var response = await productService.GetProductsAsync(new ProductQueryParameters()
+            {
+                Keyword = searchString ?? string.Empty,
+                Limit = state.PageSize,
+                Page = state.Page + 1,
+                SortBy = sortBy.ToString()
+            });
+
+
+        totalItems = response.Pagination.TotalItems;
+
+
+        pagedData = response.Data;
+        return new TableData<Product>() { TotalItems = totalItems, Items = pagedData };
+    }
+
+    private async Task OpenAddDialog()
+    {
+        var options = new DialogOptions()
+            {
+                CloseButton = true,
+                MaxWidth = MaxWidth.Medium,
+                FullWidth = true,
+                BackdropClick = false
+            };
+
+        var parameters = new DialogParameters();
+
+        var dialog = dialogService.Show<CreateProductDialog>("Thêm sản phẩm", parameters, options);
+
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            table?.ReloadServerData();
+        }
+    }
+
+    private async Task OpenUpdateDialog(Product item)
+    {
+        // var options = new DialogOptions()
+        //     {
+        //         CloseButton = true,
+        //         MaxWidth = MaxWidth.Small,
+        //         FullWidth = true,
+        //         BackdropClick = false
+        //     };
+
+        // var parameters = new DialogParameters();
+        // parameters.Add("Request", new UpdateCategoryRequest()
+        //     {
+        //         Id = item.Id,
+        //         Name = item.Name
+        //     });
+
+        // var dialog = dialogService.Show<UpdateCategoryDialog>("Sửa danh mục", parameters, options);
+
+        // var result = await dialog.Result;
+
+        // if (result != null && !result.Canceled)
+        // {
+        //     table?.ReloadServerData();
+        // }
+    }
+
+    private async Task OpenDeleteDialog(Product item)
+    {
+        string msg = $"Bạn có chắc chắn muốn xóa sản phẩm \"{item.Name}\" không?";
+        var options = new DialogOptions()
+            {
+                CloseButton = true,
+                MaxWidth = MaxWidth.Small,
+                FullWidth = true,
+                BackdropClick = true
+            };
+
+        var parameters = new DialogParameters();
+        parameters.Add("Message", msg);
+
+        var dialog = dialogService.Show<DeleteConfirmationDialog>("Xóa sản phẩm", parameters, options);
+
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            await productService.DeleteProductAsync(item.Id);
+
+            snackbar.Add("Xóa sản phẩm thành công", Severity.Success);
+
+            table?.ReloadServerData();
+        }
+    }
+
+}

@@ -2,8 +2,8 @@
 using EcommerceApp.Api.Dtos.CategoryDtos;
 using EcommerceApp.Api.Dtos.ProductDtos;
 using EcommerceApp.Api.Dtos.SharedDtos;
+using EcommerceApp.Common.Shared;
 using EcommerceApp.Domain.Models;
-using EcommerceApp.Domain.Shared;
 
 namespace EcommerceApp.Api.MappingProfiles
 {

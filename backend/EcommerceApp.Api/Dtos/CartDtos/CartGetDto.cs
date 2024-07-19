@@ -3,6 +3,6 @@
     public class CartGetDto
     {
         public Guid CartId { get; set; }
-        public string UserId { get; set; }
+        public string UserId { get; set; } = default!;
     }
 }

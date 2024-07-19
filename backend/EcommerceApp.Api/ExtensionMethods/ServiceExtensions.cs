@@ -3,10 +3,10 @@ using EcommerceApp.Api.Constants;
 using EcommerceApp.Api.Services.Implementations;
 using EcommerceApp.Api.Services.Interfaces;
 using EcommerceApp.Api.Settings;
-using EcommerceApp.DAL;
-using EcommerceApp.DAL.Repositories;
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
+using EcommerceApp.Infrastructure;
+using EcommerceApp.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -22,9 +22,9 @@ namespace EcommerceApp.Api.ExtensionMethods
         {
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
-            services.AddScoped<ICartRepository, CartRepository>();
+            //services.AddScoped<ICartRepository, CartRepository>();
             services.AddScoped<IReviewRepository, ReviewRepository>();
-            services.AddScoped<IOrderRepository, OrderRepository>();
+            //services.AddScoped<IOrderRepository, OrderRepository>();
             return services;
         }
 
@@ -72,20 +72,20 @@ namespace EcommerceApp.Api.ExtensionMethods
         {
             services.AddRateLimiter(options =>
             {
-                options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
-                {
-                    return RateLimitPartition.GetFixedWindowLimiter("GlobalLimiter", partition =>
-                    {
-                        return new FixedWindowRateLimiterOptions()
-                        {
-                            AutoReplenishment = true,
-                            PermitLimit = 5,
-                            QueueLimit = 2,
-                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                            Window = TimeSpan.FromMinutes(1)
-                        };
-                    });
-                });
+                //options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+                //{
+                //    return RateLimitPartition.GetFixedWindowLimiter("GlobalLimiter", partition =>
+                //    {
+                //        return new FixedWindowRateLimiterOptions()
+                //        {
+                //            AutoReplenishment = true,
+                //            PermitLimit = 5,
+                //            QueueLimit = 5,
+                //            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                //            Window = TimeSpan.FromMinutes(1)
+                //        };
+                //    });
+                //});
 
                 options.AddPolicy("3RequestPer30SecondsRateLimit", context =>
                 {

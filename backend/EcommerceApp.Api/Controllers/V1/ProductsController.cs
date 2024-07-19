@@ -4,10 +4,9 @@ using EcommerceApp.Api.Dtos.CategoryDtos;
 using EcommerceApp.Api.Dtos.ProductDtos;
 using EcommerceApp.Api.Dtos.SharedDtos;
 using EcommerceApp.Api.ModelBinders;
-using EcommerceApp.Domain.Constants;
+using EcommerceApp.Common.Shared;
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
-using EcommerceApp.Domain.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +18,7 @@ namespace EcommerceApp.Api.Controllers.V1
     [ApiController]
     [Route("/api/[controller]")]
     [ServiceFilter(typeof(ValidationFilterAttribute))]
-    [Authorize(Roles = UserRoleConstant.Admin)]
+    //[Authorize(Roles = UserRoleConstant.Admin)]
     //[ResponseCache(CacheProfileName = "ExpireIn300s")]
     public class ProductsController : ControllerBase
     {
@@ -36,36 +35,6 @@ namespace EcommerceApp.Api.Controllers.V1
             this.logger = logger;
         }
 
-        private async Task<ProductGetDto> BuildProductGetDto(Product product)
-        {
-            var productGetDto = mapper.Map<ProductGetDto>(product);
-
-            var categories = await productRepository.GetCategoriesOfProductAsync(product.Id);
-            productGetDto.Categories = mapper.Map<List<CategoryGetDto>>(categories);
-
-            var colours = await productRepository.GetColoursOfProductAsync(product.Id);
-            productGetDto.Colours = mapper.Map<List<ColourGetDto>>(colours);
-
-            return productGetDto;
-        }
-
-        private async Task<List<ProductGetDto>> BuildProductGetDtoList(List<Product> products)
-        {
-            var productGetDtos = mapper.Map<List<ProductGetDto>>(products);
-
-            foreach (var item in productGetDtos)
-            {
-
-                var categories = await productRepository.GetCategoriesOfProductAsync(item.Id);
-                item.Categories = mapper.Map<List<CategoryGetDto>>(categories);
-
-                var colours = await productRepository.GetColoursOfProductAsync(item.Id);
-                item.Colours = mapper.Map<List<ColourGetDto>>(colours);
-            }
-
-            return productGetDtos;
-        }
-
         [HttpGet]
         [HttpHead]
         //[ResponseCache(Duration = 100)]
@@ -76,8 +45,6 @@ namespace EcommerceApp.Api.Controllers.V1
             PagedData<Product> data = await productRepository.GetProductsAsync(queryParameters);
 
             var dataDto = mapper.Map<PagedDataDto<ProductGetDto>>(data);
-
-            dataDto.Items = await BuildProductGetDtoList(data.Items);
 
             //Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(data));
 
@@ -92,56 +59,47 @@ namespace EcommerceApp.Api.Controllers.V1
 
             if (product == null)
             {
-                return NotFound($"Cannot find the product.");
+                return NotFound($"Product with id={id} not found.");
             }
 
-            return Ok(await BuildProductGetDto(product));
+            return Ok();
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateProduct([FromBody] ProductCreateDto productCreateDto)
+        public async Task<IActionResult> CreateProduct([FromBody] ProductCreateUpdateDto productCreateDto)
         {
 
             var product = mapper.Map<Product>(productCreateDto);
-            var addedProduct = await productRepository.InsertAsync(product, 
-                productCreateDto.CategoryIds.ToList());
 
-            if (addedProduct == null)
-            {
-                return StatusCode(500);
-            }
+            var addedProduct = await productRepository.InsertAsync(
+                product, 
+                productCreateDto.CategoryIds);
 
-            return CreatedAtAction(nameof(GetProductById), new { id = addedProduct.Id }, await BuildProductGetDto(addedProduct));
+            var productDto = mapper.Map<ProductGetDto>(addedProduct);
+
+            return CreatedAtAction(nameof(GetProductById), new { id = addedProduct.Id }, productDto);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] ProductUpdateDto productUpdateDto)
+        public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] ProductCreateUpdateDto productUpdateDto)
         {
-
-            var existingProduct = await productRepository.GetByIdAsync(id);
-
             var updatedProduct = mapper.Map<Product>(productUpdateDto);
             updatedProduct.Id = id;
 
-            if (string.IsNullOrEmpty(productUpdateDto.ThumbUrl))
-            {
-                var oldProduct = await productRepository.GetByIdAsync(id);
-                updatedProduct.ThumbUrl = oldProduct?.ThumbUrl;
-            }
-            else
-            {
+            //if (string.IsNullOrEmpty(productUpdateDto.ThumbUrl))
+            //{
+            //    var oldProduct = await productRepository.GetByIdAsync(id);
+            //    updatedProduct.ThumbUrl = oldProduct?.ThumbUrl;
+            //}
+            //else
+            //{
+            //    updatedProduct.ThumbUrl = productUpdateDto.ThumbUrl;
+            //}
 
-            }
 
+            await productRepository.UpdateAsync(updatedProduct, productUpdateDto.CategoryIds);
 
-            await productRepository.UpdateAsync(updatedProduct);
-
-            if (existingProduct == null)
-            {
-                return CreatedAtAction(nameof(GetProductById), new { id }, updatedProduct);
-            }
-
-            return Ok("Updated the product successfully.");
+            return Ok();
         }
 
         [HttpDelete("{id}")]
@@ -152,45 +110,45 @@ namespace EcommerceApp.Api.Controllers.V1
             return NoContent();
         }
 
-        [HttpGet("collection/({ids})")]
-        public async Task<IActionResult> GetProductCollection([ModelBinder(BinderType = typeof(ListModelBinder))] IEnumerable<Guid> ids)
-        {
-            var products = await productRepository.GetProductsByIdsAsync(ids);
-            return Ok(await BuildProductGetDtoList(products));
-        }
+        //[HttpGet("collection/({ids})")]
+        //public async Task<IActionResult> GetProductCollection([ModelBinder(BinderType = typeof(ListModelBinder))] IEnumerable<Guid> ids)
+        //{
+        //    var products = await productRepository.GetProductsByIdsAsync(ids);
+        //    return Ok(await BuildProductGetDtoList(products));
+        //}
 
-        [HttpPatch("{id}")]
-        public async Task<IActionResult> PartiallyUpdateProduct(Guid id, [FromBody] JsonPatchDocument<ProductUpdateDto> patchDocument)
-        {
-            if (patchDocument == null)
-            {
-                return BadRequest();
-            }
+        //[HttpPatch("{id}")]
+        //public async Task<IActionResult> PartiallyUpdateProduct(Guid id, [FromBody] JsonPatchDocument<ProductCreateUpdateDto> patchDocument)
+        //{
+        //    if (patchDocument == null)
+        //    {
+        //        return BadRequest();
+        //    }
 
-            var product = await productRepository.GetByIdAsync(id);
+        //    var product = await productRepository.GetByIdAsync(id);
 
-            if (product == null)
-            {
-                return NotFound($"Cannot find the product to update.");
-            }
+        //    if (product == null)
+        //    {
+        //        return NotFound($"Product with id={id} not found.");
+        //    }
 
-            var productUpdateDto = mapper.Map<ProductUpdateDto>(product);
+        //    var productUpdateDto = mapper.Map<ProductCreateUpdateDto>(product);
 
-            patchDocument.ApplyTo(productUpdateDto, ModelState);
+        //    patchDocument.ApplyTo(productUpdateDto, ModelState);
 
-            TryValidateModel(productUpdateDto);
-            if (!ModelState.IsValid)
-            {
-                return UnprocessableEntity(ModelState);
-            }
+        //    TryValidateModel(productUpdateDto);
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return UnprocessableEntity(ModelState);
+        //    }
 
-            var updatedProduct = mapper.Map<Product>(productUpdateDto);
-            updatedProduct.Id = id;
+        //    var updatedProduct = mapper.Map<Product>(productUpdateDto);
+        //    updatedProduct.Id = id;
 
-            await productRepository.UpdateAsync(updatedProduct);
+        //    await productRepository.UpdateAsync(updatedProduct);
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
         [HttpOptions]
         public IActionResult GetProductsOptions()
@@ -199,50 +157,7 @@ namespace EcommerceApp.Api.Controllers.V1
             return Ok();
         }
 
-        [HttpGet("{productId}/variants/{variantNumber}")]
-        public async Task<IActionResult> GetProductVariant(Guid productId, int variantNumber)
-        {
-            var productVariant = await productRepository.GetProductVariantAsync(productId, variantNumber);
-
-            if (productVariant == null)
-            {
-                return NotFound("Cannot find the product variant.");
-            }
-
-            var variantDto = mapper.Map<ProductVariantGetDto>(productVariant);
-
-            return Ok(variantDto);
-
-        }
-
-        [HttpGet("{productId}/variants")]
-        public async Task<IActionResult> GetProductVariants(Guid productId)
-        {
-            var productVariants = await productRepository.GetProductVariantsAsync(productId);
-
-            var result = mapper.Map<List<ProductVariantGetDto>>(productVariants);
-
-            return Ok(result);
-
-        }
-
-        [HttpPost("{productId}/variants")]
-        public async Task<IActionResult> AddVariantForProduct(ProductVariantAddDto productVariantAddDto)
-        {
-            var variant = mapper.Map<ProductVariant>(productVariantAddDto);
-
-            var addedVariant = await productRepository.AddVariantForProductAsync(productVariantAddDto.ProductId, variant);
-
-            if (addedVariant == null)
-            {
-                return StatusCode(500);
-            }
-
-            var variantGetDto = mapper.Map<ProductVariantGetDto>(productVariantAddDto);
-
-            return CreatedAtAction(nameof(GetProductVariant), new { }, variantGetDto);
-
-        }
+       
 
     }
 }

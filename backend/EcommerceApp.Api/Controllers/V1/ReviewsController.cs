@@ -3,18 +3,17 @@ using EcommerceApp.Api.CustomFilters;
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
-using EcommerceApp.Domain.Shared;
-using EcommerceApp.Api.Dtos.SharedDtos;
 using Microsoft.AspNetCore.Authorization;
 using EcommerceApp.Api.Dtos.ReviewDtos;
-using EcommerceApp.DAL.Repositories;
+using EcommerceApp.Api.Dtos.SharedDtos;
+using EcommerceApp.Common.Shared;
 
 namespace EcommerceApp.Api.Controllers.V1
 {
     [ApiController]
     [Route("/api/[controller]")]
     [ServiceFilter(typeof(ValidationFilterAttribute))]
-    [Authorize]
+    //[Authorize]
     public class ReviewsController : ControllerBase
     {
         private readonly IReviewRepository reviewRepository;
@@ -45,7 +44,7 @@ namespace EcommerceApp.Api.Controllers.V1
 
             if (review == null)
             {
-                return NotFound($"Cannot find the review.");
+                return NotFound($"Review with id={id} not found.");
             }
 
             var dto = mapper.Map<ReviewGetDto>(review);
@@ -58,13 +57,7 @@ namespace EcommerceApp.Api.Controllers.V1
         {
            
             var review = mapper.Map<Review>(reviewCreateDto);
-
             var addedReview = await reviewRepository.InsertAsync(review);
-
-            if (addedReview == null)
-            {
-                return StatusCode(500);
-            }
 
             var getDto = mapper.Map<ReviewGetDto>(addedReview);
 
@@ -75,19 +68,12 @@ namespace EcommerceApp.Api.Controllers.V1
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> UpdateReview(Guid id, [FromBody] ReviewUpdateDto reviewUpdateDto)
         {
-            var existingReview = await reviewRepository.GetByIdAsync(id);
-
             var updatedReview = mapper.Map<Review>(reviewUpdateDto);
             updatedReview.Id = id;
 
             await reviewRepository.UpdateAsync(updatedReview);
 
-            if (existingReview == null)
-            {
-                return CreatedAtAction(nameof(GetReviewById), new { id }, updatedReview);
-            }
-
-            return Ok("Updated the review successfully.");
+            return Ok();
         }
 
         [HttpDelete("{id}")]

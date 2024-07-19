@@ -1,4 +1,4 @@
-﻿using EcommerceApp.Domain.Constants;
+﻿using EcommerceApp.Common.Constants;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EcommerceApp.Api.Dtos.OrderDtos

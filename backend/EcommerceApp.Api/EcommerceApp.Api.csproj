@@ -31,8 +31,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EcommerceApp.DAL\EcommerceApp.DAL.csproj" />
+    <ProjectReference Include="..\EcommerceApp.Common\EcommerceApp.Common.csproj" />
     <ProjectReference Include="..\EcommerceApp.Domain\EcommerceApp.Domain.csproj" />
+    <ProjectReference Include="..\EcommerceApp.Infrastructure\EcommerceApp.Infrastructure.csproj" />
 	  
   </ItemGroup>
 

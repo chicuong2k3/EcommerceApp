@@ -1,0 +1,57 @@
+﻿
+
+<MudForm @ref="form" Model="Request"  
+    Validation="@(validator.ValidateValue)" ValidationDelay="0">
+    <MudDialog>
+        <DialogContent>
+            <MudCardContent>
+                <MudTextField Label="Tên danh mục"
+                              ShrinkLabel
+                              Margin="Margin.Dense" Immediate="true"
+                              @bind-Value="Request!.Name"
+                              For="@(() => Request!.Name)" />
+            </MudCardContent>
+        </DialogContent>
+        <DialogActions>
+            <MudButton Color="Color.Dark" OnClick="Cancel"
+                       Variant="Variant.Filled">Thoát</MudButton>
+            <MudButton Color="Color.Primary" OnClick="SubmitAsync"
+                       Variant="Variant.Filled"
+                       Disabled="@(!validator.Validate(Request).IsValid)">Lưu</MudButton>
+        </DialogActions>
+    </MudDialog>
+    
+</MudForm>
+
+@code {
+    [Parameter]
+    public CreateCategoryRequest Request { get; set; } = new();
+
+    [CascadingParameter]
+    public MudDialogInstance? MudDialog { get; set; }
+
+    private MudForm? form;
+
+    private CreateCategoryValidator validator = new();
+
+    private async Task SubmitAsync()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            await SaveAsync();
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        var response = await categoryService.CreateCategoryAsync(Request ?? new CreateCategoryRequest());
+
+        snackbar.Add("Thêm danh mục thành công", Severity.Success);
+
+        MudDialog?.Close();
+    }
+
+    private void Cancel() => MudDialog?.Cancel();
+
+}

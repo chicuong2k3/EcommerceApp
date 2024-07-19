@@ -1,0 +1,188 @@
+﻿@page "/admin/categories"
+
+@using EcommerceApp.BlazorWeb.Components.Category
+
+<MudTable ServerData="ServerReload" Dense="true" Hover="true" Bordered="true" @ref="table">
+    <ToolBarContent>
+        <MudTooltip Text="Thêm danh mục" Duration="500">
+            <MudFab Color="Color.Success"
+                    Size="Size.Small" DropShadow="false"
+                    StartIcon="@Icons.Material.Filled.Add"
+                    OnClick="() => OpenAddDialog()" />
+        </MudTooltip>
+        <MudSpacer />
+        <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" 
+            Placeholder="Tìm kiếm" Immediate="true"
+            Adornment="Adornment.Start"
+            AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" 
+            Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>
+            <MudTableSortLabel SortLabel="name_field" T="Category">
+                Tên danh mục
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>Slug</MudTh>
+        <MudTh>Hành động</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Name</MudTd>
+        <MudTd>@context.Slug</MudTd>
+        <MudTd>
+            <MudTooltip Text="Sửa sản phẩm" Duration="500">
+                <MudFab StartIcon="@Icons.Material.Filled.Edit" DropShadow="false"
+                        Color="Color.Warning" Size="Size.Small"
+                        OnClick="() => OpenUpdateDialog(context)" />
+            </MudTooltip>
+            <MudTooltip Text="Xóa sản phẩm" Duration="500">
+                <MudFab StartIcon="@Icons.Material.Filled.Delete" DropShadow="false"
+                        Color="Color.Error" Size="Size.Small"
+                        OnClick="() => OpenDeleteDialog(context)" />
+            </MudTooltip>
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>Không có dữ liệu</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <MudText>Đang tải...</MudText>
+    </LoadingContent>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[] { 5, 10, 50 }"
+                       RowsPerPageString="@("Số dòng mỗi trang:")"
+                       InfoFormat="@("Dòng {first_item}-{last_item}/{all_items} dòng")"
+                       HorizontalAlignment="HorizontalAlignment.Right" />
+    </PagerContent>
+</MudTable>
+
+
+
+
+@code {
+
+    private IEnumerable<Category>? pagedData;
+    private MudTable<Category>? table;
+    private int totalItems;
+    private string? searchString = null;
+
+    private async Task<TableData<Category>> ServerReload(TableState state, CancellationToken token)
+    {
+        var sortBy = new StringBuilder();
+
+        if (!string.IsNullOrEmpty(state.SortLabel))
+        {
+            switch (state.SortLabel)
+            {
+                case "name_field":
+                    sortBy.Append("name");
+                    if (state.SortDirection == SortDirection.Descending)
+                    {
+                        sortBy.Append(" desc");
+                    }
+                    break;
+
+            }
+
+        }
+
+        var response = await categoryService.GetCategoriesAsync(new CategoryQueryParameters()
+            {
+                Keyword = searchString ?? string.Empty,
+                Limit = state.PageSize,
+                Page = state.Page + 1,
+                SortBy = sortBy.ToString()
+            });
+
+        totalItems = response.Pagination.TotalItems;
+
+        pagedData = response.Data;
+        return new TableData<Category>() { TotalItems = totalItems, Items = pagedData };
+    }
+
+    
+    private void OnSearch(string text)
+    {
+        searchString = text;
+        table?.ReloadServerData();
+    }
+
+
+    private async Task OpenAddDialog()
+    {
+        var options = new DialogOptions()
+            {
+                CloseButton = true,
+                MaxWidth = MaxWidth.Small,
+                FullWidth = true,
+                BackdropClick = false
+            };
+
+        var parameters = new DialogParameters();
+
+        var dialog = dialogService.Show<CreateCategoryDialog>("Thêm danh mục", parameters, options);
+
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            table?.ReloadServerData();
+        }
+    }
+
+    private async Task OpenUpdateDialog(Category item)
+    {
+        var options = new DialogOptions()
+            {
+                CloseButton = true,
+                MaxWidth = MaxWidth.Small,
+                FullWidth = true,
+                BackdropClick = false
+            };
+
+        var parameters = new DialogParameters();
+        parameters.Add("Request", new UpdateCategoryRequest()
+        {
+            Id = item.Id,
+            Name = item.Name
+        });
+
+        var dialog = dialogService.Show<UpdateCategoryDialog>("Sửa danh mục", parameters, options);
+
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            table?.ReloadServerData();
+        }
+    }
+
+    private async Task OpenDeleteDialog(Category item)
+    {
+        string msg = $"Bạn có chắc chắn muốn xóa danh mục \"{item.Name}\" không?";
+        var options = new DialogOptions()
+            {
+                CloseButton = true,
+                MaxWidth = MaxWidth.Small,
+                FullWidth = true,
+                BackdropClick = true
+            };
+
+        var parameters = new DialogParameters();
+        parameters.Add("Message", msg);
+
+        var dialog = dialogService.Show<DeleteConfirmationDialog>("Xóa danh mục", parameters, options);
+
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            await categoryService.DeleteCategoryAsync(item.Id);
+
+            snackbar.Add("Xóa danh mục thành công", Severity.Success);
+
+            table?.ReloadServerData();
+        }
+    }
+
+}

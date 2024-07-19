@@ -1,5 +1,5 @@
-﻿using EcommerceApp.Domain.Models;
-using EcommerceApp.Domain.Shared;
+﻿using EcommerceApp.Common.Shared;
+using EcommerceApp.Domain.Models;
 
 namespace EcommerceApp.Domain.Interfaces
 {
@@ -7,7 +7,7 @@ namespace EcommerceApp.Domain.Interfaces
     {
         Task<PagedData<Review>> GetReviewsAsync(ReviewQueryParameters queryParameters);
         Task<Review?> GetByIdAsync(Guid id);
-        Task<Review?> InsertAsync(Review review);
+        Task<Review> InsertAsync(Review review);
         Task UpdateAsync(Review review);
         Task DeleteAsync(Guid id);
     }

@@ -1,0 +1,85 @@
+﻿
+
+<MudForm @ref="form" Model="Request"  
+    Validation="@(validator.ValidateValue)" ValidationDelay="0">
+    <MudDialog>
+        <DialogContent>
+            <MudCardContent>
+                <MudTextField Label="Tên sản phẩm"
+                              ShrinkLabel 
+                              Margin="Margin.Dense" Immediate="true"
+                              @bind-Value="Request!.Name" 
+                              For="@(() => Request!.Name)" />
+               
+               <MudExRichTextEdit Immediate="true"
+                   @bind-Value="Request!.Description"
+                   Placeholder="Nhập mô tả cho sản phẩm"
+                   For="@(() => Request!.Description)" />
+
+
+                <MudSelect Margin="Margin.Dense" T="int"
+                Label="Chọn danh mục" ShrinkLabel
+                Variant="Variant.Text">
+                    @if (categories != null)
+                    {
+                        @foreach (var category in categories)
+                        {
+                            <MudSelectItem Value="@category.Id">
+                                @category.Name
+                            </MudSelectItem>
+                        }
+                    }
+                </MudSelect>
+            </MudCardContent>
+        </DialogContent>
+        <DialogActions>
+            <MudButton Color="Color.Dark" OnClick="Cancel"
+                       Variant="Variant.Filled">Thoát</MudButton>
+            <MudButton Color="Color.Primary" OnClick="SubmitAsync"
+                       Variant="Variant.Filled"
+                       Disabled="@(!validator.Validate(Request).IsValid)">Lưu</MudButton>
+        </DialogActions>
+    </MudDialog>
+    
+</MudForm>
+
+@code {
+    [Parameter]
+    public CreateProductRequest Request { get; set; } = new();
+
+    [CascadingParameter]
+    public MudDialogInstance? MudDialog { get; set; }
+
+    private MudForm? form;
+
+    private CreateProductValidator validator = new();
+
+    private List<Category> categories;
+
+    protected async override void OnInitialized()
+    {
+        categories = await categoryService.GetAllCategoriesAsync();
+
+    }
+
+    private async Task SubmitAsync()
+    {
+        await form!.Validate();
+        if (form.IsValid)
+        {
+            await SaveAsync();
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        var response = await productService.CreateProductAsync(Request ?? new CreateProductRequest());
+
+        snackbar.Add("Thêm sản phẩm thành công", Severity.Success);
+
+        MudDialog?.Close();
+    }
+
+    private void Cancel() => MudDialog?.Cancel();
+
+}

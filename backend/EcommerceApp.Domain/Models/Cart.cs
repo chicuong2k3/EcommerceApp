@@ -2,9 +2,9 @@
 {
     public class Cart
     {
-        public Guid Id { get; set; }
-        public required string AppUserId { get; set; }
-        public AppUser? AppUser { get; set; }
+        public string Id { get; set; } = default!;
+        public string AppUserId { get; set; } = default!;
+        public ProductVariation AppUser { get; set; } = default!;
         public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
     }
 }

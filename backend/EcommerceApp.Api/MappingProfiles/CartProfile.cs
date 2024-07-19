@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using EcommerceApp.Api.Dtos.CartDtos;
 using EcommerceApp.Api.Dtos.SharedDtos;
+using EcommerceApp.Common.Shared;
 using EcommerceApp.Domain.Models;
-using EcommerceApp.Domain.Shared;
 
 namespace EcommerceApp.Api.MappingProfiles
 {

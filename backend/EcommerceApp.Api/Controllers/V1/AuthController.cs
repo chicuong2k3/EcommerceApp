@@ -2,7 +2,7 @@
 using EcommerceApp.Api.CustomFilters;
 using EcommerceApp.Api.Dtos.AuthenticationDtos;
 using EcommerceApp.Api.Services.Interfaces;
-using EcommerceApp.Domain.Constants;
+using EcommerceApp.Common.Constants;
 using EcommerceApp.Domain.Interfaces;
 using EcommerceApp.Domain.Models;
 using Microsoft.AspNetCore.Identity;
@@ -92,9 +92,14 @@ namespace EcommerceApp.Api.Controllers.V1
         {
             var user = await userManager.FindByNameAsync(loginDto.UserName);
 
+            if (user == null)
+            {
+                return BadRequest("Login information is wrong.");
+            }
+
             var isValid = await userManager.CheckPasswordAsync(user, loginDto.Password);
 
-            if (user == null || !isValid)
+            if (!isValid)
             {
                 return BadRequest("Login information is wrong.");
             }

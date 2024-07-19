@@ -1,4 +1,5 @@
 ﻿using EcommerceApp.Api.Dtos.CategoryDtos;
+using EcommerceApp.Domain.Models;
 
 namespace EcommerceApp.Api.Dtos.ProductDtos
 {
@@ -7,11 +8,8 @@ namespace EcommerceApp.Api.Dtos.ProductDtos
         public Guid Id { get; init; }
         public string Name { get; init; } = string.Empty;
         public string Description { get; init; } = string.Empty;
-        public string ThumbUrl { get; init; } = string.Empty;
-        public decimal OriginalPrice { get; set; }
-        public decimal SalePrice { get; set; }
-        public List<CategoryGetDto>? Categories { get; set; }
-        public List<ColourGetDto>? Colours { get; set; }
+        public List<ProductItemDto> ProductItems { get; set; } = new();
+        public List<CategoryGetDto> Categories { get; set; } = new();
 
     }
 

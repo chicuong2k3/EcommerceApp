@@ -1,0 +1,29 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudCardContent>
+            <MudText>@Message</MudText>
+        </MudCardContent>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Dark" OnClick="Cancel"
+                   Variant="Variant.Filled">Thoát</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Agree"
+                   Variant="Variant.Filled">Xác nhận xóa</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public string Message { get; set; } = default!;
+
+    [CascadingParameter]
+    public MudDialogInstance? MudDialog { get; set; }
+
+
+    private MudForm? form;
+
+    private void Agree() => MudDialog?.Close(DialogResult.Ok(true));
+
+    private void Cancel() => MudDialog?.Cancel();
+
+}
