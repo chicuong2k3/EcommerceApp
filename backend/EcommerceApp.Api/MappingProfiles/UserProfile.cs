@@ -8,7 +8,7 @@ namespace EcommerceApp.Api.MappingProfiles
     {
         public UserProfile()
         {
-            CreateMap<ProductVariation, AppUserCreateDto>().ReverseMap();
+            CreateMap<AppUser, AppUserCreateDto>().ReverseMap();
         }
     }
 }

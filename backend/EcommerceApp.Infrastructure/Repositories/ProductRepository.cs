@@ -23,6 +23,8 @@ namespace EcommerceApp.Infrastructure.Repositories
             return await dbContext.Products
                 .AsNoTracking()
                 .Where(x => x.Id == id)
+                .Include(x => x.ProductItems).ThenInclude(x => x.ProductVariations)
+                .Include(x => x.Categories)
                 .FirstOrDefaultAsync();
         }
 
@@ -94,6 +96,7 @@ namespace EcommerceApp.Infrastructure.Repositories
                 {
                     throw new BadRequestException<IEnumerable<Category>>();
                 }
+
                 product.Categories = categories;
             }
 

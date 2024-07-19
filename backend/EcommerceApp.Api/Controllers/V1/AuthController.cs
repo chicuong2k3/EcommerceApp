@@ -62,6 +62,11 @@ namespace EcommerceApp.Api.Controllers.V1
 
             if (!result.Succeeded)
             {
+                if (result.Errors.Any())
+                {
+                    return BadRequest(result.Errors);
+                }
+
                 return StatusCode(500);
             }
 
@@ -73,16 +78,10 @@ namespace EcommerceApp.Api.Controllers.V1
                 return StatusCode(500);
             }
 
-            var cart = await cartRepository.CreateCartAsync(new Cart() 
+            await cartRepository.CreateCartAsync(new Cart() 
             { 
                 AppUserId = user.Id 
             });
-
-            if (cart == null)
-            {
-                await userManager.DeleteAsync(user);
-                return StatusCode(500);
-            }
 
             return Created();
         }

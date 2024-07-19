@@ -3,22 +3,15 @@
 public class ProductVariationRequest
 {
     public string Name { get; set; } = default!;
-    public string Value { get; set; } = default!;
-}
-
-public class ProductItemRequest
-{
-    public int QuantityInStock { get; set; }
-    public decimal BasePrice { get; set; }
-    public List<ProductVariationRequest> ProductVariations { get; set; } = new();
+    public List<string> Values { get; set; } = new();
 }
 
 public class CreateProductRequest
 {
     public string Name { get; set; } = default!;
     public string Description { get; set; } = default!;
-    public List<ProductItemRequest> ProductItems { get; set; } = new();
-    public List<int> CategoryIds { get; set; } = new();
+    public List<ProductVariationRequest> ProductVariations { get; set; } = new();
+    public IEnumerable<int> CategoryIds { get; set; } = new List<int>();
 
 }
 
@@ -30,24 +23,18 @@ internal class ProductVariationValidator : AbstractValidator<ProductVariationReq
             .NotEmpty().WithMessage("Vui lòng nhập tên phân loại.")
             .MaximumLength(50).WithMessage("Tên phân loại không được quá 50 kí tự.");
 
-        RuleFor(x => x.Value)
+        RuleFor(x => x.Values)
+            .NotEmpty().WithMessage("Vui lòng nhập giá trị phân loại.");
+
+        //RuleFor(x => x.QuantityInStock)
+        //    .GreaterThanOrEqualTo(0).WithMessage("Số lượng trong kho phải lớn hơn hoặc bằng 0.");
+
+        //RuleFor(x => x.BasePrice)
+        //    .GreaterThan(0).WithMessage("Giá sản phẩm phải lớn hơn 0.");
+
+        RuleForEach(x => x.Values)
             .NotEmpty().WithMessage("Vui lòng nhập giá trị phân loại.")
             .MaximumLength(50).WithMessage("Giá trị phân loại không được quá 50 kí tự.");
-    }
-}
-
-internal class ProductItemValidator : AbstractValidator<ProductItemRequest>
-{
-    public ProductItemValidator()
-    {
-        RuleFor(x => x.QuantityInStock)
-            .GreaterThanOrEqualTo(0).WithMessage("Số lượng trong kho phải lớn hơn hoặc bằng 0.");
-
-        RuleFor(x => x.BasePrice)
-            .GreaterThan(0).WithMessage("Giá sản phẩm phải lớn hơn 0.");
-
-        RuleForEach(x => x.ProductVariations)
-            .SetValidator(new ProductVariationValidator());
     }
 }
 
@@ -66,8 +53,8 @@ internal class CreateProductValidator : AbstractValidator<CreateProductRequest>
         RuleFor(x => x.CategoryIds)
             .NotNull().WithMessage("Vui lòng chọn danh mục.");
 
-        RuleForEach(x => x.ProductItems)
-                .SetValidator(new ProductItemValidator());
+        RuleForEach(x => x.ProductVariations)
+                .SetValidator(new ProductVariationValidator());
     }
 
     public Func<object, string, Task<IEnumerable<string>>> ValidateValue =>

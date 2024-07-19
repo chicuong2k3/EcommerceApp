@@ -1,9 +1,12 @@
-﻿namespace EcommerceApp.Api.Dtos.CartDtos
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace EcommerceApp.Api.Dtos.CartDtos
 {
     public class AddProductToCartDto
     {
-        public required Guid ProductId { get; set; }
-        public required int ProductVariantNumber { get; set; }
+        [Required]
+        public Guid ProductItemId { get; set; } = default!;
+        [Range(0, 10000)]
         public int Quantity { get; set; }
     }
 }

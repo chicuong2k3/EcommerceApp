@@ -13,7 +13,6 @@ namespace EcommerceApp.Api.Controllers.V1
     [ApiController]
     [Route("/api/[controller]")]
     [ServiceFilter(typeof(ValidationFilterAttribute))]
-    //[Authorize]
     public class ReviewsController : ControllerBase
     {
         private readonly IReviewRepository reviewRepository;

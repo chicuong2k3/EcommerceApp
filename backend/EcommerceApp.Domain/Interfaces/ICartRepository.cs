@@ -5,16 +5,14 @@ namespace EcommerceApp.Domain.Interfaces
 {
     public interface ICartRepository
     {
-        Task<Cart?> GetCartByIdAsync(Guid cartId);
-        Task<Cart?> CreateCartAsync(Cart cart);
-        Task<CartItem?> GetCartItemByIdAsync(Guid cartItemId);
-        Task<PagedData<CartItem>> GetCartItemsAsync(Guid cartId, CartItemQueryParameters queryParameters);
-        Task<CartItem?> AddProductsAsync(Guid cartId, Guid productId, int variantNumber, int quantity);
-        Task RemoveProductAsync(Guid cartItemId, int quantity);
-        Task<string> GetCartOwnerIdAsync(Guid cartId);
+        Task<Cart?> GetCartByIdAsync(string cartId);
+        Task CreateCartAsync(Cart cart);
+        Task<CartItem?> GetCartItemByIdAsync(string cartItemId);
+        Task<PagedData<CartItem>> GetCartItemsAsync(string cartId, CartItemQueryParameters queryParameters);
+        Task<CartItem> AddProductsAsync(string cartId, Guid productItemId, int quantity);
+        Task DecreaseProductQuantityAsync(string cartItemId, int quantity);
+        Task<string> GetCartOwnerIdAsync(string cartId);
         Task<Cart?> GetCartByOwnerIdAsync(string userId);
-        Task ClearCartAsync(Guid cartId);
-
-        decimal GetTotalPrice(Guid cartId);
+        Task ClearCartAsync(string cartId);
     }
 }

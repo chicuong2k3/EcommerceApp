@@ -62,7 +62,7 @@ namespace EcommerceApp.Api.Controllers.V1
                 return NotFound($"Product with id={id} not found.");
             }
 
-            return Ok();
+            return Ok(mapper.Map<ProductGetDto>(product));
         }
 
         [HttpPost]

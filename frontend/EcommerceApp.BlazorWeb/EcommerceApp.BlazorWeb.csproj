@@ -12,9 +12,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.3" PrivateAssets="all" />
     <PackageReference Include="MudBlazor" Version="7.3.0" />
     <PackageReference Include="MudExRichTextEditor" Version="1.0.9" />
-    <PackageReference Include="Syncfusion.Blazor.Grid" Version="26.1.35" />
-    <PackageReference Include="Syncfusion.Blazor.Navigations" Version="26.1.41" />
-    <PackageReference Include="Syncfusion.Blazor.Themes" Version="26.1.41" />
   </ItemGroup>
 
   <ItemGroup>

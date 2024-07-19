@@ -20,7 +20,7 @@ namespace EcommerceApp.Api.Controllers.V1
     [ApiController]
     [Route("/api/[controller]")]
     [ServiceFilter(typeof(ValidationFilterAttribute))]
-    //[Authorize(Roles = UserRoleConstant.Admin)]
+    [Authorize(Roles = UserRoleConstant.Admin)]
     public class CategoriesController : ControllerBase
     {
         private readonly ICategoryRepository categoryRepository;

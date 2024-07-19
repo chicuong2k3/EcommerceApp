@@ -1,173 +1,151 @@
-﻿//using EcommerceApp.Domain.Exceptions;
-//using EcommerceApp.Domain.Interfaces;
-//using EcommerceApp.Domain.Models;
-//using EcommerceApp.Domain.Shared;
-//using EcommerceApp.Infrastructure;
-//using Microsoft.EntityFrameworkCore;
-//using System.Linq;
+﻿
+using EcommerceApp.Common.Exceptions;
+using EcommerceApp.Common.Shared;
+using EcommerceApp.Domain.Interfaces;
+using EcommerceApp.Domain.Models;
+using EcommerceApp.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
-//namespace EcommerceApp.Infrastructure.Repositories
-//{
-//    public class CartRepository : ICartRepository
-//    {
-//        private readonly AppDbContext dbContext;
+namespace EcommerceApp.Infrastructure.Repositories
+{
+    public class CartRepository : ICartRepository
+    {
+        private readonly AppDbContext dbContext;
 
-//        public CartRepository(AppDbContext dbContext)
-//        {
-//            this.dbContext = dbContext;
-//        }
-//        public async Task<CartItem?> AddProductsAsync(Guid cartId, Guid productId, int variantNumber, int quantity)
-//        {
-//            var productVariant = await dbContext.ProductVariants
-//                .Where(x => x.ProductId == productId
-//                && x.VariantNumber == variantNumber)
-//                .FirstOrDefaultAsync();
+        public CartRepository(AppDbContext dbContext)
+        {
+            this.dbContext = dbContext;
+        }
+        public async Task<CartItem> AddProductsAsync(string cartId, Guid productItemId, int quantity)
+        {
+            var product = await dbContext.ProductItems
+                .Where(x => x.Id == productItemId)
+                .FirstOrDefaultAsync();
 
-//            if (productVariant == null)
-//                throw new NotFoundException("The product variation does not exist.");
+            if (product == null)
+                throw new NotFoundException<ProductItem, Guid>();
 
-//            var cart = await dbContext.Carts.FindAsync(cartId);
-//            if (cart == null)
-//                throw new NotFoundException("The cart does not exist.");
+            var cart = await dbContext.Carts.FindAsync(cartId);
+            if (cart == null)
+                throw new NotFoundException<Cart, string>();
 
-//            var cartItem = dbContext.CartItems
-//                .Where(x => x.CartId == cartId && x.ProductId == productId && x.VariantNumber == variantNumber)
-//                .FirstOrDefault();
+            var cartItem = dbContext.CartItems
+                .Where(x => x.CartId == cartId && x.ProductItemId == productItemId)
+                .FirstOrDefault();
 
-//            if (cartItem == null)
-//            {
-//                cartItem = new CartItem()
-//                {
-//                    ProductId = productId,
-//                    VariantNumber = variantNumber,
-//                    CartId = cartId,
-//                    Quantity = quantity
-//                };
+            if (cartItem == null)
+            {
+                cartItem = new CartItem()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    ProductItemId = productItemId,
+                    CartId = cartId,
+                    Quantity = quantity
+                };
 
-//                dbContext.CartItems.Add(cartItem);
-//            }
-//            else
-//            {
-//                cartItem.Quantity += quantity;
+                dbContext.CartItems.Add(cartItem);
+            }
+            else
+            {
+                cartItem.Quantity += quantity;
 
-//            }
+            }
 
-//            try
-//            {
-//                await dbContext.SaveChangesAsync();
-//                return cartItem;
-//            }
-//            catch (Exception)
-//            {
-//                return null;
-//            }
-//        }
+            await dbContext.SaveChangesAsync();
+            return cartItem;
+        }
 
-//        public async Task ClearCartAsync(Guid cartId)
-//        {
-//            var cartItems = dbContext.CartItems.Where(x => x.CartId == cartId);
-//            dbContext.CartItems.RemoveRange(cartItems);
-//            await dbContext.SaveChangesAsync();
-//        }
+        public async Task ClearCartAsync(string cartId)
+        {
+            var cartItems = dbContext.CartItems.Where(x => x.CartId == cartId);
+            dbContext.CartItems.RemoveRange(cartItems);
+            await dbContext.SaveChangesAsync();
+        }
 
-//        public async Task<Cart?> CreateCartAsync(Cart cart)
-//        {
-//            try
-//            {
-//                dbContext.Carts.Add(cart);
-//                await dbContext.SaveChangesAsync();
-//                return cart;
-//            }
-//            catch (Exception)
-//            {
-//                return null;
-//            }
-//        }
+        public async Task CreateCartAsync(Cart cart)
+        {
+            cart.Id = Guid.NewGuid().ToString();
+            dbContext.Carts.Add(cart);
+            await dbContext.SaveChangesAsync();
+        }
 
-//        public async Task<Cart?> GetCartByIdAsync(Guid cartId)
-//        {
-//            return await dbContext.Carts
-//                .AsNoTracking()
-//                .Where(x => x.Id == cartId)
-//                .FirstOrDefaultAsync();
-//        }
+        public async Task<Cart?> GetCartByIdAsync(string cartId)
+        {
+            return await dbContext.Carts
+                .AsNoTracking()
+                .Where(x => x.Id == cartId)
+                .FirstOrDefaultAsync();
+        }
 
-//        public async Task<Cart?> GetCartByOwnerIdAsync(string userId)
-//        {
+        public async Task<Cart?> GetCartByOwnerIdAsync(string userId)
+        {
 
-//            return await dbContext.Carts.AsNoTracking()
-//                .Where(x => x.AppUserId == userId)
-//                .FirstOrDefaultAsync();
-//        }
+            return await dbContext.Carts.AsNoTracking()
+                .Where(x => x.AppUserId == userId)
+                .FirstOrDefaultAsync();
+        }
 
-//        public async Task<CartItem?> GetCartItemByIdAsync(Guid cartItemId)
-//        {
-//            return await dbContext.CartItems
-//                .AsNoTracking()
-//                .Where(x => x.Id == cartItemId)
-//                .FirstOrDefaultAsync();
-//        }
+        public async Task<CartItem?> GetCartItemByIdAsync(string cartItemId)
+        {
+            return await dbContext.CartItems
+                .AsNoTracking()
+                .Where(x => x.Id == cartItemId)
+                .FirstOrDefaultAsync();
+        }
 
-//        public async Task<PagedData<CartItem>> GetCartItemsAsync(Guid cartId, CartItemQueryParameters queryParameters)
-//        {
-//            var items = dbContext.CartItems.AsNoTracking();
+        public async Task<PagedData<CartItem>> GetCartItemsAsync(string cartId, CartItemQueryParameters queryParameters)
+        {
+            var items = dbContext.CartItems
+                .Where(x => x.CartId == cartId)
+                .AsNoTracking();
 
-//            var totalItems = await items.CountAsync();
+            var totalItems = await items.CountAsync();
 
-//            var start = (queryParameters.Page - 1) * queryParameters.Limit;
-//            items = items.Skip(start).Take(queryParameters.Limit);
+            var start = (queryParameters.Page - 1) * queryParameters.Limit;
+            items = items.Skip(start).Take(queryParameters.Limit);
 
 
-//            return new PagedData<CartItem>(
-//                await items.AsNoTracking().ToListAsync(),
-//                queryParameters.Page,
-//                queryParameters.Limit,
-//                totalItems);
+            return new PagedData<CartItem>(
+                await items.AsNoTracking().ToListAsync(),
+                queryParameters.Page,
+                queryParameters.Limit,
+                totalItems);
 
-//        }
-//        public async Task<string> GetCartOwnerIdAsync(Guid cartId)
-//        {
-//            var cart = await dbContext.Carts.FindAsync(cartId);
+        }
+        public async Task<string> GetCartOwnerIdAsync(string cartId)
+        {
+            var cart = await dbContext.Carts.FindAsync(cartId);
 
-//            if (cart == null)
-//                throw new NotFoundException("The cart does not exist.");
+            if (cart == null)
+                throw new NotFoundException<Cart, string>();
 
-//            return cart.AppUserId;
-//        }
+            return cart.AppUserId;
+        }
 
-//        public decimal GetTotalPrice(Guid cartId)
-//        {
-//            var cartItems = dbContext.CartItems.Where(x => x.CartId == cartId);
+        public async Task DecreaseProductQuantityAsync(string cartItemId, int quantity)
+        {
 
-//            var temp = dbContext.Products
-//                .Join(cartItems, p => p.Id, c => c.ProductId, (p, c) => new { p.SalePrice, c.Quantity });
+            var existingCartItem = dbContext.CartItems
+                .Where(x => x.Id == cartItemId)
+                .FirstOrDefault();
 
-//            return temp.Sum(x => x.SalePrice * x.Quantity);
-//        }
+            if (existingCartItem == null)
+                throw new NotFoundException<CartItem, string>();
 
-//        public async Task RemoveProductAsync(Guid cartItemId, int quantity)
-//        {
+            if (existingCartItem.Quantity < quantity)
+            {
+                throw new QuantityExceedException("The quantity of items to remove must not exceed the quantity of items in the cart.");
+            }
 
-//            var existingCartItem = dbContext.CartItems
-//                .Where(x => x.Id == cartItemId)
-//                .FirstOrDefault();
+            existingCartItem.Quantity -= quantity;
 
-//            if (existingCartItem == null)
-//                throw new NotFoundException("The cart item does not exist.");
+            if (existingCartItem.Quantity == 0)
+            {
+                dbContext.CartItems.Remove(existingCartItem);
+            }
 
-//            if (existingCartItem.Quantity < quantity)
-//            {
-//                throw new QuantityExceedException("The quantity of items to remove must not exceed the quantity of items in the cart.");
-//            }
-
-//            existingCartItem.Quantity -= quantity;
-
-//            if (existingCartItem.Quantity == 0)
-//            {
-//                dbContext.CartItems.Remove(existingCartItem);
-//            }
-
-//            await dbContext.SaveChangesAsync();
-//        }
-//    }
-//}
+            await dbContext.SaveChangesAsync();
+        }
+    }
+}

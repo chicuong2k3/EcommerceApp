@@ -70,6 +70,7 @@ namespace EcommerceApp.Infrastructure
                 FirstName = "Dododo",
                 LastName = "Golem",
                 UserName = "admin12345",
+                NormalizedUserName = "ADMIN12345",
                 RegistrationDate = DateTime.Now
             };
             user1.PasswordHash = passwordHasher.HashPassword(user1, "admin12345");
@@ -80,6 +81,7 @@ namespace EcommerceApp.Infrastructure
                 FirstName = "Gagaga",
                 LastName = "Magician",
                 UserName = "customer12345",
+                NormalizedUserName = "CUSTOMER12345",
                 RegistrationDate = DateTime.Now
             };
             user2.PasswordHash = passwordHasher.HashPassword(user2, "customer12345");
@@ -87,6 +89,14 @@ namespace EcommerceApp.Infrastructure
             modelBuilder.Entity<AppUser>().HasData(
                 user1, user2
             );
+
+            Cart cart = new Cart()
+            {
+                Id = Guid.NewGuid().ToString(),
+                AppUserId = user2.Id,
+            };
+
+            modelBuilder.Entity<Cart>().HasData(cart);
 
             modelBuilder.Entity<IdentityUserRole<string>>().HasData(
                 new IdentityUserRole<string>()

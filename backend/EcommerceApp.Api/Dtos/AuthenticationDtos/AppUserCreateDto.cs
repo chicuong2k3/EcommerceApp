@@ -6,16 +6,21 @@ namespace EcommerceApp.Api.Dtos.AuthenticationDtos
     {
 
         [MaxLength(100)]
-        public required string FirstName { get; set; }
+        [Required]
+        public string FirstName { get; set; } = default!;
 
         [MaxLength(100)]
-        public required string LastName { get; set; }
+        [Required]
+        public string LastName { get; set; } = default!;
         [MaxLength(100)]
-        public required string UserName { get; set; }
+        [Required]
+        public string UserName { get; set; } = default!;
         [MaxLength(100)]
-        public required string Password { get; set; }
+        [Required]
+        public string Password { get; set; } = default!;
         [MaxLength(100)]
-        public required string Email { get; set; }
+        [Required]
+        public string Email { get; set; } = default!;
         [MaxLength(100)]
         public string? PhoneNumber { get; set; }
 

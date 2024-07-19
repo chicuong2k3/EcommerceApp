@@ -1,0 +1,34 @@
+﻿
+<MudTextField Label="Tên phân loại"
+              ShrinkLabel
+              Margin="Margin.Dense" Immediate="true"
+              @bind-Value="ProductVariation!.Name"
+              For="@(() => ProductVariation!.Name)" />
+
+<MudButton Color="Color.Secondary" Variant="Variant.Filled"
+           OnClick="AddVariationValueComponent">
+    Thêm giá trị phân loại
+</MudButton>
+
+@foreach (var variantValueComponent in variationValueComponents)
+{
+    @variantValueComponent
+}
+
+@code {
+    [Parameter]
+    public ProductVariationRequest ProductVariation { get; set; } = new();
+
+    private List<RenderFragment> variationValueComponents = new();
+
+    private void AddVariationValueComponent()
+    {
+        RenderFragment component = builder =>
+        {
+            builder.OpenComponent(0, typeof(VariationValueComponent));
+            builder.CloseComponent();
+        };
+        variationValueComponents.Add(component);
+    }
+
+}
